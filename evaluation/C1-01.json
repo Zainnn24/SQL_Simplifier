@@ -1,0 +1,24 @@
+{
+  "task_id": "C1-01",
+  "family": "C1",
+  "split": "dev",
+  "schema_sql": "CREATE TABLE samples (row_id BIGINT NOT NULL, reading BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM samples WHERE (reading >= 10 AND reading <= 20) OR (reading >= 18 AND reading <= 25) OR reading >= 40",
+  "reference_sql": "SELECT row_id FROM samples WHERE (reading >= 10 AND reading <= 25) OR reading >= 40",
+  "sample_rows": [
+    {"row_id": 1, "reading": 9},
+    {"row_id": 2, "reading": 10},
+    {"row_id": 3, "reading": 17},
+    {"row_id": 4, "reading": 18},
+    {"row_id": 5, "reading": 20},
+    {"row_id": 6, "reading": 21},
+    {"row_id": 7, "reading": 25},
+    {"row_id": 8, "reading": 26},
+    {"row_id": 9, "reading": 39},
+    {"row_id": 10, "reading": 40}
+  ],
+  "expected_rows": [[2], [3], [4], [5], [6], [7], [10]],
+  "derivation": "The inclusive intervals [10, 20] and [18, 25] overlap, so their union is [10, 25]. The separate interval starting at 40 also qualifies.",
+  "source": "SQL_Predicate_Family_Examples.sql, C1. Adapted from Apache Calcite RexProgramTest.java, https://github.com/apache/calcite/blob/57ad4ffb1ed9b86d18fcfd7627fdf5c4227bc172/core/src/test/java/org/apache/calcite/rex/RexProgramTest.java#L1619-L1635",
+  "error_exposed": "Dropping reading >= 40 loses row 10 (reading 40). Extending the merged interval through the gap incorrectly includes row 8 (26) or row 9 (39)."
+}

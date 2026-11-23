@@ -1,0 +1,18 @@
+{
+  "task_id": "B3-01",
+  "family": "B3",
+  "split": "dev",
+  "schema_sql": "CREATE TABLE parcels (row_id BIGINT NOT NULL, weight_kg BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM parcels WHERE weight_kg >= 15 AND weight_kg <= 15",
+  "reference_sql": "SELECT row_id FROM parcels WHERE weight_kg = 15",
+  "sample_rows": [
+    {"row_id": 1, "weight_kg": 14},
+    {"row_id": 2, "weight_kg": 15},
+    {"row_id": 3, "weight_kg": 16},
+    {"row_id": 4, "weight_kg": 15}
+  ],
+  "expected_rows": [[2], [4]],
+  "derivation": "The two inclusive bounds pin weight_kg to 15. Both parcels with that weight qualify.",
+  "source": "SQL_Predicate_Family_Examples.sql, B3. Adapted from Apache Calcite RexProgramTest.java, https://github.com/apache/calcite/blob/57ad4ffb1ed9b86d18fcfd7627fdf5c4227bc172/core/src/test/java/org/apache/calcite/rex/RexProgramTest.java#L1078-L1079",
+  "error_exposed": "Keeping only weight_kg >= 15 includes row 3 (weight 16). Keeping only weight_kg <= 15 includes row 1 (weight 14)."
+}
