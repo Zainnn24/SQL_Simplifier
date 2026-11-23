@@ -2,11 +2,10 @@
 
 We will test whether an LLM can shorten a DuckDB `WHERE` predicate while preserving the rows selected under explicit schema constraints. Each role owns one part of the prototype and a set of benchmark families.
 
-## Where to find the three starting tasks
-
+## Where to find the three example SQL queries
 Open the SQL seed file inside data folder and search for the headings `-- E2.`, `-- B3.` and `-- C1.`. `E2`, `B3` and `C1` are family labels in that file. The suffix `-01` names the first task in a family, which is the runnable SQL block already under that heading. Thus `E2-01` is the jobs example, `B3-01` is the parcels example and `C1-01` is the samples example. Each block includes its schema, inserts, original query and smaller reference and can run on its own in DuckDB.
 
-## Benchmark design at a glance
+## Initial benchmark design
 
 The planned benchmark contains **5 categories × 5 families per category × 4 tasks per family = 100 tasks**. A **category** names the kind of reasoning a filter requires. A **family** names a specific reason a rewrite works. A **task** gives the model one schema and one original query to simplify. For example, B covers comparisons on a single column, B3 covers two bounds that pin the column to one value, and one B3 task asks the model to shorten `x >= 6 AND x <= 6`. The hidden reference is `x = 6`.
 
