@@ -2,23 +2,6 @@
 
 We will test whether an LLM can shorten a DuckDB `WHERE` predicate while preserving the rows selected under explicit schema constraints. Each role owns one part of the prototype and a set of benchmark families.
 
-## Where to find the three example SQL queries
-Open the SQL seed file inside data folder and search for the headings `-- E2.`, `-- B3.` and `-- C1.`. `E2`, `B3` and `C1` are family labels in that file. The suffix `-01` names the first task in a family, which is the runnable SQL block already under that heading. Thus `E2-01` is the jobs example, `B3-01` is the parcels example and `C1-01` is the samples example. Each block includes its schema, inserts, original query and smaller reference and can run on its own in DuckDB.
-
-## Initial benchmark design
-
-The planned benchmark contains **5 categories × 5 families per category × 4 tasks per family = 100 tasks**. A **category** names the kind of reasoning a filter requires. A **family** names a specific reason a rewrite works. A **task** gives the model one schema and one original query to simplify. For example, B covers comparisons on a single column, B3 covers two bounds that pin the column to one value, and one B3 task asks the model to shorten `x >= 6 AND x <= 6`. The hidden reference is `x = 6`.
-
-| Category | What the tasks ask |
-| --- | --- |
-| A. Boolean structure | Can a repeated condition, a shared condition or a negation be simplified? |
-| B. Single-column comparisons and bounds | Which comparisons still restrict a single integer column once its other bounds are known? |
-| C. Unions and gaps in integer ranges | Which integer values are included when ranges overlap, meet or leave a gap? |
-| D. Contradictions and impossible branches | Can any legal row satisfy all the conditions in this branch? |
-| E. Simplification under schema constraints | Which conditions does an explicit row-level `CHECK` already guarantee? |
-
-The owner of each family keeps its existing seed as task 1 and adds **three new input queries**, each with its own hidden reference. The plan tables illustrate each rule. The sql file inside data folder contains one original query and one smaller reference per family. That pair counts as one task. Across all families, 25 tasks are ready and 75 remain to be written. We reserve one whole family per category for development (20 tasks) and the other four for testing (80 tasks). This lets us evaluate performance on new families within each category. A candidate succeeds when it selects the same rows for every legal input and its predicate has fewer syntax-tree nodes. The hidden reference is one way to meet those criteria.
-
 ## 1. SQL-to-Z3 translation and equivalence checking
 
 **Deliverable.** A checker that takes the schema, original predicate and candidate predicate. It parses the supported SQL with SQLGlot, counts predicate AST nodes and asks Z3 whether a legal row can distinguish the two predicates. For a disagreement, it replays the row in DuckDB and returns the row, both predicate truth values and both query outputs. The pipeline consumes this result.
@@ -138,6 +121,23 @@ The pipeline accepts a candidate when `status == "EQUIVALENT"` **and** `candidat
 **First task.** The completed `B3-01.json` and `C1-01.json` records are supplied. Check their sample rows against the seed INSERTs, run both SELECTs and confirm their outputs match `expected_rows`. This completes the initial handoff.
 
 **Later benchmark work.** Review candidate examples from [SQLSolver’s Spark tests](https://github.com/SJTU-IPADS/SQLSolver/blob/main/sqlsolver_data/db_rule_instances/spark_tests) and [SQLGlot’s simplify tests](https://github.com/tobymao/sqlglot/blob/089891f2521780e2c5b243005017af9db62f25a6/tests/fixtures/optimizer/simplify.sql). An adapted case can fill a family slot when its provenance is recorded. Remove structural duplicates before reporting a separate external set.
+
+## Where to find the three example SQL queries
+Open the SQL seed file inside data folder and search for the headings `-- E2.`, `-- B3.` and `-- C1.`. `E2`, `B3` and `C1` are family labels in that file. The suffix `-01` names the first task in a family, which is the runnable SQL block already under that heading. Thus `E2-01` is the jobs example, `B3-01` is the parcels example and `C1-01` is the samples example. Each block includes its schema, inserts, original query and smaller reference and can run on its own in DuckDB.
+
+## Initial benchmark design
+
+The planned benchmark contains **5 categories × 5 families per category × 4 tasks per family = 100 tasks**. A **category** names the kind of reasoning a filter requires. A **family** names a specific reason a rewrite works. A **task** gives the model one schema and one original query to simplify. For example, B covers comparisons on a single column, B3 covers two bounds that pin the column to one value, and one B3 task asks the model to shorten `x >= 6 AND x <= 6`. The hidden reference is `x = 6`.
+
+| Category | What the tasks ask |
+| --- | --- |
+| A. Boolean structure | Can a repeated condition, a shared condition or a negation be simplified? |
+| B. Single-column comparisons and bounds | Which comparisons still restrict a single integer column once its other bounds are known? |
+| C. Unions and gaps in integer ranges | Which integer values are included when ranges overlap, meet or leave a gap? |
+| D. Contradictions and impossible branches | Can any legal row satisfy all the conditions in this branch? |
+| E. Simplification under schema constraints | Which conditions does an explicit row-level `CHECK` already guarantee? |
+
+The owner of each family keeps its existing seed as task 1 and adds **three new input queries**, each with its own hidden reference. The plan tables illustrate each rule. The sql file inside data folder contains one original query and one smaller reference per family. That pair counts as one task. Across all families, 25 tasks are ready and 75 remain to be written. We reserve one whole family per category for development (20 tasks) and the other four for testing (80 tasks). This lets us evaluate performance on new families within each category. A candidate succeeds when it selects the same rows for every legal input and its predicate has fewer syntax-tree nodes. The hidden reference is one way to meet those criteria.
 
 ## 4. Shared benchmark and experiment decisions
 
