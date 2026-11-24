@@ -1,25 +1,24 @@
-# Task 2 · Build the LLM simplification and repair pipeline
+# LLM lead — deliverables
 
-**Start immediately with a dummy verifier.** The LLM lead writes a local test function, `dummy_verify(schema_sql, original_sql, candidate_sql)`, while the verifier lead builds the real checker. Use the E2-01 SQL and the two complete `CheckResult` examples in §2. Those examples are ready to use now.
+Your main deliverable is the model-driven simplification loop and its reproducible logs. Start with a scripted model and fixture verifier results; a live provider and a completed verifier are not prerequisites for the first handoff.
 
-**First working milestone.** Pass `dummy_verify` into the repair loop as its checker. Have the scripted model return the two E2 candidates in §3. When it proposes `end_day >= 10`, the dummy returns the saved `DIFFERENT` result so you can test that the counterexample reaches the second prompt. When it proposes `start_day >= 10`, the dummy returns the saved `EQUIVALENT` result (7 → 3 nodes) so you can test that the loop stops. Match the complete candidate SELECT to its fixture, and raise a test error for an unexpected input. Save both attempts as a development trace.
-
-| You own | You receive | You hand off |
+| You receive | You deliver | Recipient |
 | --- | --- | --- |
-| Model adapter, prompt, repair loop, CLI and attempt logs for RQ2 | The verifier’s `verify(schema_sql, original_sql, candidate_sql)` and the benchmark lead’s task records | A reproducible single-task and batch runner, development pilot, frozen run configuration and evaluation-readable JSONL |
-| A1–A5, B1–B2 and D1–D2 | Nine existing SQL seeds | 36 reviewed tasks, including 27 new variants. The verifier lead reviews yours. You review the evaluation lead’s 32 tasks. |
+| Verifier's `validate_input`, `verify`, ValidationResult and CheckResult | Model adapter, generic prompt and four-call repair loop | Team; evaluation for experimentation |
+| Task records/manifest and split from evaluation | Single-task/batch CLI, configuration, attempt logs and run summaries | Evaluation lead |
+| Nine seeds and shared benchmark format | 36 tasks for A1–A5/B1–B2/D1–D2; review of evaluation's 32 tasks | Evaluation for integration and review feedback |
 
-CLI flags, file names and status strings below are proposed team interfaces. The four-call budget, first-attempt measurement and strict size rule come from the project.
+The [team contract](../README.md#4-shared-benchmark-and-experiment-decisions) is the common definition. The verifier lead implements SQL validation, AST counting, equivalence checking and DuckDB replay. You call the two functions below and decide how the model run proceeds. Evaluation implements the row-evaluation tool and scorer.
 
-## 1. Construct the first request
+**First handoff:** script E2-01 to return the wrong candidate and then the correct smaller candidate. Use fixture preflight/check results with the exact real signatures, save both attempts and the run summary, and give the trace to evaluation. Replace the fixtures with real verifier calls when available. E2 is the jobs block in [the seed file](../data/SQL_Predicate_Family_Examples.sql).
 
-Open the SQL seed file in data folder and search for the headings `-- E2.`, `-- B3.` and `-- C1.`. `E2`, `B3` and `C1` are family labels in that file. The suffix `-01` names the first task in a family, which is the runnable SQL block already under that heading. Thus `E2-01` is the jobs example, `B3-01` is the parcels example and `C1-01` is the samples example. Each block includes its schema, inserts, original query and smaller reference and can run on its own in DuckDB.
+## D1. Model adapter, prompt and candidate extraction
 
-1. Load the task by ID. In the initial scripted test, stub the input check to return `READY` for the known E2 schema and original query. At integration, call `validate_input(schema_sql, original_sql)` and continue on `READY` before spending a model call. Record any other preflight outcome with zero calls. Pass only `schema_sql` and `original_sql` into the prompt builder. Keep IDs, family labels, examples, reference queries, sample data, provenance and reasoning in offline records. Strip benchmark comments from the DDL and SQL the model sees.
-2. Use one generic instruction across all families. Ask for **one full SELECT** so the verifier can check the unchanged table and ordered projection. Include allowed syntax and the size rule. Pin the output format before the test run.
-3. Make a thin model adapter that accepts the rendered messages and settings and returns the raw text, model identifier, available token counts and elapsed time. Give the scripted adapter the same interface. Store credentials outside the logs.
+**Receive:** schema_sql and original_sql from a benchmark task, the shared SQL scope, model settings and verifier diagnostics for later feedback.
 
-**Draft first-attempt prompt**
+**Implement:** an adapter returning raw model text, model identity, available input/output token counts and elapsed time. Give the scripted adapter the same interface. Keep credentials outside configuration artifacts and logs. Start a fresh conversation for each task/repetition.
+
+Only clean schema and original SQL enter the initial prompt with generic instructions. Keep IDs, family labels, sample rows, references, provenance and derivations offline. Strip benchmark comments from the DDL and SELECT. Ask for one complete SELECT with the original table and projection.
 
 ```text
 Rewrite only the WHERE predicate of the supplied DuckDB query. Return one complete SELECT
@@ -36,117 +35,84 @@ Original query
 {original_sql}
 ```
 
-For the initial parser, trim whitespace and require one statement. If you decide to allow one enclosing Markdown code fence, strip only that outer wrapper and freeze the decision with the prompt. Preserve the raw response and the exact candidate submitted for verification. A multi-statement or malformed response consumes one attempt and receives a diagnostic.
+Use the shared `sql-or-single-fence-v1` extraction policy: trim whitespace and optionally remove one outer SQL code fence. Preserve raw text and exact candidate SQL. Let `verify` validate statement count, SQL syntax and the supported fragment. If no candidate can be extracted, record pipeline OUTPUT_ERROR and diagnostic; it still consumes one model call. Do not invent a verifier result for a response the verifier did not check.
 
-## 2. Implement the loop
+**Hand off:** the scripted/live adapter, generic prompt and versioned response parser as part of the runner delivered in D3. Evaluation receives the frozen artifacts through the run configuration.
 
-Use `attempt_no = 1…4`. Start a fresh conversation for every task and repetition. After each response, write the attempt, including its verifier outcome, **before** requesting another proposal. A syntactically valid candidate can still change the projected columns or fail equivalence.
+**Acceptance:** a scripted adapter produces both E2 responses; a live adapter can run a development task when configured. Prompt inspection confirms no hidden task information enters either the initial request or repair messages. Raw responses remain available even on extraction failure.
 
-### Main verifier function inputs and outputs
+## D2. Repair loop consuming the verifier APIs
 
-`verify(schema_sql: str, original_sql: str, candidate_sql: str) -> CheckResult` checks one candidate per call. The first two arguments come from the benchmark task. The third is the full SELECT proposed on this attempt. A direct checker test can supply a hand-written candidate in the same argument.
+**Receive:** both functions and their result types from the verifier lead. Import them from `verifier`:
 
-**Input.** For the first attempt on `E2-01`, the following JSON object holds the three arguments. A Python caller can pass the decoded object as `verify(**request)`.
+```python
+def validate_input(
+    schema_sql: str,
+    original_sql: str,
+    *,
+    timeout_ms: int,
+) -> ValidationResult:
+    ...
 
-```json
-{
-  "schema_sql": "CREATE TABLE jobs (row_id BIGINT NOT NULL, start_day BIGINT NOT NULL, end_day BIGINT NOT NULL, CHECK (start_day <= end_day))",
-  "original_sql": "SELECT row_id FROM jobs WHERE start_day >= 10 AND end_day >= 10",
-  "candidate_sql": "SELECT row_id FROM jobs WHERE end_day >= 10"
-}
+
+def verify(
+    schema_sql: str,
+    original_sql: str,
+    candidate_sql: str,
+    *,
+    timeout_ms: int,
+) -> CheckResult:
+    ...
 ```
 
-`schema_sql` supplies one table definition, including its declared checks. `original_sql` supplies the query to simplify. `candidate_sql` must keep the original table and ordered projection and may change the WHERE predicate. The hidden reference and sample rows stay in the benchmark record.
+These are the functions you consume, not functions you implement. See [their semantics](../README.md#verifier-function-semantics), [ValidationResult](../README.md#validationresult) and [CheckResult](../README.md#checkresult). Pass `config["solver_timeout_ms"]` as timeout_ms on each call. A solver check's timeout is distinct from the model request timeout and generation budget.
 
-**Output.** Every `CheckResult` has these five top-level fields. The examples show their JSON representation.
+**Implement:** call validate_input once before generation. Continue only on READY; otherwise end with zero calls and preserve the full preflight result. For each of up to four dispatched requests, extract a candidate, call verify and record the attempt before asking again. Keep the original schema/query available throughout repairs.
 
-| Field | JSON type | Meaning |
-| --- | --- | --- |
-| `status` | string | One of `EQUIVALENT`, `DIFFERENT`, `INVALID_CANDIDATE`, `INVALID_INPUT`, `UNSAT_SCHEMA`, `INCONCLUSIVE` or `REPLAY_ERROR`. |
-| `original_nodes` | integer or null | Number of AST nodes in the original WHERE predicate. Use null if the count is unavailable. |
-| `candidate_nodes` | integer or null | The same count for the candidate. |
-| `diagnostic` | string or null | Explanation of a validation, schema, solver or replay issue. Use null when there is no diagnostic. |
-| `witness` | object or null | A DuckDB-confirmed counterexample for `DIFFERENT`. Use null for the other statuses. |
-
-For the request above, DuckDB confirms the following counterexample.
-
-```json
-{
-  "status": "DIFFERENT",
-  "original_nodes": 7,
-  "candidate_nodes": 3,
-  "diagnostic": null,
-  "witness": {
-    "row": {"row_id": 2, "start_day": 9, "end_day": 10},
-    "original_truth": false,
-    "candidate_truth": true,
-    "original_rows": [],
-    "candidate_rows": [[2]]
-  }
-}
-```
-
-`witness.row` maps **every declared column** to its integer value for one legal row. The two `*_truth` fields are Boolean results of evaluating the WHERE predicates on that row. The two `*_rows` fields are the full SELECT outputs after inserting just that row into DuckDB. The outer array holds result rows. Each inner array holds the projected columns in SELECT order. Here `[]` means zero rows and `[[2]]` means one row containing the selected `row_id` of 2. The solver may find a different legal counterexample.
-
-For the second attempt, keep the same schema and original SQL and set `candidate_sql` to `SELECT row_id FROM jobs WHERE start_day >= 10`. The verifier returns the following result.
-
-```json
-{
-  "status": "EQUIVALENT",
-  "original_nodes": 7,
-  "candidate_nodes": 3,
-  "diagnostic": null,
-  "witness": null
-}
-```
-
-The pipeline accepts a candidate when `status == "EQUIVALENT"` **and** `candidate_nodes < original_nodes`. A copy of the original also returns `EQUIVALENT`, but its node counts are 7 and 7, so the pipeline can request another attempt if budget remains.
-
-### Handle the outcome of each attempt
-
-| Outcome from checker or adapter | What the next step does |
+| Received outcome | Pipeline action |
 | --- | --- |
-| `EQUIVALENT` and strictly fewer nodes | Record `ACCEPTED`, return the candidate and end the run. Any verified smaller rewrite qualifies. |
-| `EQUIVALENT` and equal or greater size | Give the two sizes, restate the strict target, and request a new candidate if a call remains. Count this as first-attempt equivalence if it occurred on attempt 1. |
-| `DIFFERENT` | Give the proposed SQL, the replay-confirmed legal row, the two truth values and the two projected outputs. Ask for a revision against the original schema and query. |
-| `INVALID_CANDIDATE` | Return the parse, binding, changed-projection or unsupported-syntax diagnostic. Keep the generic format and fragment reminder. |
-| `INVALID_INPUT` or `UNSAT_SCHEMA` | End the run as a source-input/control outcome. Keep it distinct from a model-generated invalid candidate. |
-| `INCONCLUSIVE` or `REPLAY_ERROR` | Proposed handling: stop this run, preserve the evidence and flag it for evaluation. A failed replay ends the run for investigation; use the same frozen policy for solver timeouts and UNKNOWN. |
-| Call 4 finishes without acceptance on a retryable outcome | Record `BUDGET_EXHAUSTED` and return the original. Preserve the fourth outcome as well as the terminal reason. |
-| Provider or infrastructure failure | Record `API_ERROR` and the available usage data. Predeclare the transport policy before test runs; count each dispatched generation request against the cap. Flag incomplete runs for reporting. |
+| EQUIVALENT with strictly fewer nodes | ACCEPTED; return candidate and stop |
+| EQUIVALENT with equal/greater size | Give both sizes and retry if budget remains; a copy still counts for first-attempt equivalence |
+| DIFFERENT | Send the actual candidate, confirmed legal row, both truth values and both outputs; request a revision |
+| INVALID_CANDIDATE | Send the verifier diagnostic with generic syntax/format guidance; retry if possible |
+| INVALID_INPUT / UNSAT_SCHEMA | End as a source-input outcome, distinct from a bad model proposal |
+| INCONCLUSIVE / REPLAY_ERROR | Stop, preserve evidence and report separately; do not claim equivalence or an LLM semantic error |
+| OUTPUT_ERROR | Send the extraction diagnostic and retry if possible |
+| Fourth retryable outcome without acceptance | BUDGET_EXHAUSTED; return the original SQL |
+| Provider failure | API_ERROR; preserve available usage and stop under the shared no-automatic-retry policy |
 
-The feedback message keeps the schema and original query available on every turn. Use only diagnostics for the candidate that was actually checked. A copied or repeated candidate still uses a call. The final output should include the selected SQL, whether it was accepted, the terminal reason and the attempt count, so a caller can distinguish an accepted rewrite from an original returned at exhaustion.
+For development, implement `dummy_verify` with the **same parameters, including keyword-only timeout_ms**, as verify. Match the schema, original and complete candidate to saved E2 fixtures; raise a test error for unexpected inputs. The preflight stub likewise matches validate_input and returns the documented READY object for E2. These test doubles supply canned answers only. Replace both by the real verifier functions for integration.
 
-## 3. Build the E2 integration test
+**Hand off:** the repair loop and deterministic integration tests to the team; deliver their traces to evaluation through D3. The shared [E2 request/results](../README.md#e2-request-and-results) and [JSONL trace](../README.md#e2-scripted-jsonl-trace) are the authoritative examples.
 
-Use the existing `E2-01` jobs schema with `CHECK (start_day <= end_day)`. The original is `SELECT row_id FROM jobs WHERE start_day >= 10 AND end_day >= 10`.
+**Acceptance:** E2 first returns `SELECT row_id FROM jobs WHERE end_day >= 10`, receives DIFFERENT, then returns `SELECT row_id FROM jobs WHERE start_day >= 10`, receives EQUIVALENT (7 → 3), and stops after two calls. With the real checker assert witness legality and disagreement, not a particular solver row. Test a copied first answer, invalid SQL then success, four failures, changed projection, inconclusive check, replay discrepancy and API/output errors. Exhaustion uses exactly four requests; replay failure stops immediately.
 
-| Attempt | Scripted model returns | Expected trace |
-| --- | --- | --- |
-| 1 | `SELECT row_id FROM jobs WHERE end_day >= 10` | Verifier returns `DIFFERENT`, 7 → 3. A fixture witness is `row_id=2, start_day=9, end_day=10`; original false, candidate true, outputs `[]` and `[[2]]`. The next message includes all four observations and the row. |
-| 2 | `SELECT row_id FROM jobs WHERE start_day >= 10` | Verifier returns `EQUIVALENT`, 7 → 3. Stop immediately, return the second SQL and preserve the failed first attempt. |
+## D3. Single/batch runner, configuration and JSONL logs
 
-At integration, pass the real `verify` function into the same loop in place of `dummy_verify`. Keep the model responses scripted for this run. Assert witness **legality and disagreement** in the integration test because Z3 may choose a different row. Finally, run the same CLI with the live provider on development inputs. Save scripted traces separately from measured model traces.
+**Receive:** the task manifest from evaluation, D1/D2 components, real verifier functions and the shared [RunConfig](../README.md#runconfig) and [JSONL record formats](../README.md#jsonl-record-formats).
 
-Additional scripted checks: a copy followed by a smaller candidate, invalid SQL followed by a valid candidate, four repeated failures, a changed projection, an inconclusive check and a replay discrepancy. For exhaustion verify exactly four requests and the original output. For a replay discrepancy verify immediate termination. Inspect rendered prompts to confirm that seed comments and hidden answers never enter either request.
+**Implement:** entry points using the existing folder name:
 
-## 4. Make runs scoreable and reproducible
+```text
+python -m LLM_pipeline run --manifest benchmark.jsonl --task E2-01 --repeat 1 --config dev.json --output results/dev/
+python -m LLM_pipeline batch --manifest benchmark.jsonl --split test --repeats 3 --config frozen.json --output results/test/
+```
 
-Proposed entry points are `python -m pipeline run --task E2-01 --repeat 1 --config dev.json` and `python -m pipeline batch --split test --repeats 3 --config frozen.json`. Support running one case before attempting the batch.
+The commands are targets to implement. The batch runner selects task/repeat combinations; evaluation uses it to execute the official frozen run. Keep every run's context separate. Record immutable configuration identity, model/sampling settings, prompt/parser versions, dependency/code versions, benchmark version, solver timeout, model timeout and failure policy.
 
-| Record | Minimum fields |
-| --- | --- |
-| Run identity | `run_id`, `task_id`, `split`, `repeat`, `config_id`; store the model identifier, sampling settings, prompt version, dependency versions and solver timeout with the configuration |
-| Attempt | `attempt_no`, raw response, `candidate_sql`, verifier `status`, `original_nodes`, `candidate_nodes`, diagnostic or witness, tokens where available, elapsed time and the feedback actually sent |
-| Run end | `terminal_reason`, `accepted`, `selected_sql`, `calls_used`, total elapsed time, and whether token accounting is complete |
+Write one attempt record per dispatched request and one run_end record per run, including non-READY preflight with zero calls. Nest the unmodified CheckResult under check_result. API_ERROR/OUTPUT_ERROR/INCOMPLETE belong to the pipeline and have no CheckResult. The feedback field records the message actually included with that attempt, so attempt 1 has null and attempt 2 contains the first result's feedback. Keep signed integer values exact. Missing token counts remain null and make total accounting incomplete.
 
-Use a durable key such as `(run_id, attempt_no)` and one final record per run. Ensure the scorer reads a finished run once. When resuming after a crash, reconcile recorded requests before generating again; mark an unresolved dispatched request as incomplete. Preserve first attempts, failures and fallbacks. Keep signed 64-bit integer values exact when serializing witnesses and parsing logs.
+Journal dispatches before requests, save completed attempts before retrying, and reconcile uncertain dispatches after crashes. Preserve first attempts and final failure reasons. An unresolved dispatched request becomes INCOMPLETE and consumes a call; automatic transport retries must not exceed the cap. Use the durable `(run_id, attempt_no)` key and exactly one terminal record per run.
 
-**Handoff to evaluation:** supply the two-attempt E2 trace and a copy-on-first-attempt trace. For E2, their scorer should produce first-equivalent = 0, first-verified-smaller = 0, accepted-within-four = 1, recovered-after-confirmed-error = 1, calls = 2, nodes removed = 4. For a copied first answer, first-equivalent = 1 and first-verified-smaller = 0.
+**Hand off:** runner, config/prompt/parser artifacts, the scripted E2 trace, a copy-on-first-attempt trace and live development pilot logs to evaluation. Collaborate on freezing the experiment, then let evaluation run/scoring use the same runner rather than building another execution loop.
 
-## 5. Form your 36 benchmark tasks
+**Acceptance:** evaluation scores the E2 trace without any model call: first-equivalent 0, first-smaller 0, final success 1, recovery 1/1, two calls and four nodes removed. A copied first answer gives first-equivalent 1 and first-smaller 0. A teammate can run one case, inspect its first candidate, reconstruct feedback and identify accepted SQL versus fallback. Supply the runnable E2 demonstration for the final project demo.
 
-Keep each seed as variant 01 and author three more per family. Replace every symbolic `P`, `Q` or `R` below with an actual comparison. Each record needs a schema, original SELECT, strictly smaller hidden equivalent SELECT, sample rows with expected outputs, provenance and the specific error a boundary row exposes. The three directions per family are proposals to develop and review.
+## D4. Your 36 benchmark tasks and cross-review
+
+**Receive:** A1–A5, B1–B2 and D1–D2 seeds, the [task/review formats](../README.md#44-benchmark-review-and-verifier-fixture-formats) and [split/review rotation](../README.md#46-benchmark-split-review-and-integration-milestones).
+
+**Implement:** keep each seed as variant 01 and author three meaningful variants per family. Replace P, Q and R with actual comparisons. Each record needs schema, original SELECT, a strictly smaller equivalent reference, legal sample rows and expected outputs, provenance and the error its boundary rows expose.
 
 | Family | Variant 02 | Variant 03 | Variant 04 |
 | --- | --- | --- | --- |
@@ -160,36 +126,8 @@ Keep each seed as variant 01 and author three more per family. Replace every sym
 | D1 · incompatible equalities **(dev)** | Keep a live alternative to two incompatible equalities | Put the contradiction under NOT | Embed it in one branch of a larger guarded query |
 | D2 · conflicting bounds | Use a strict and inclusive bound meeting at one endpoint | Keep a separate live interval | Negate the impossible conjunction inside a larger predicate |
 
-Provide rows that can detect a plausible over-simplification. For A2 dual absorption, take `P = units >= 10` and `Q = discount_pct > 0`. Include a row with units 9 and discount 5: the original dual rejects it, but returning Q alone would accept it. Keep hidden references and family-specific reasoning outside of prompts, including during repair.
+For A2 dual absorption, take P = `units >= 10` and Q = `discount_pct > 0`. Include units 9, discount 5: the original dual rejects it, while returning Q alone accepts it. Keep references and family-specific reasoning outside prompts during every attempt. Only A2 and D1 are development families for your contribution.
 
-### Shared JSON template for writing a benchmark task
+**Hand off:** 36 records to evaluation for integration and to verifier for review. Review evaluation's 32 tasks and return corrections/approval to that lead and the manifest owner. Use the shared [benchmark task records](../README.md#benchmark-task-records) and [review metadata](../README.md#review-metadata) for full JSON.
 
-Copy this completed `B3-01` record when writing a task for your own family. Replace the values with your task’s SQL, data, expected projected rows and derivation. Only `schema_sql` and `original_sql` enter the model prompt alongside the generic instructions. Keep the reference and all review fields offline. The second completed seed, `C1-01`, appears in the evaluation plan.
-
-```json
-{
-  "task_id": "B3-01",
-  "family": "B3",
-  "split": "dev",
-  "schema_sql": "CREATE TABLE parcels (row_id BIGINT NOT NULL, weight_kg BIGINT NOT NULL)",
-  "original_sql": "SELECT row_id FROM parcels WHERE weight_kg >= 15 AND weight_kg <= 15",
-  "reference_sql": "SELECT row_id FROM parcels WHERE weight_kg = 15",
-  "sample_rows": [
-    {"row_id": 1, "weight_kg": 14},
-    {"row_id": 2, "weight_kg": 15},
-    {"row_id": 3, "weight_kg": 16},
-    {"row_id": 4, "weight_kg": 15}
-  ],
-  "expected_rows": [[2], [4]],
-  "derivation": "The two inclusive bounds pin weight_kg to 15. Both parcels with that weight qualify.",
-  "source": "SQL_Predicate_Family_Examples.sql, B3. Adapted from Apache Calcite RexProgramTest.java, https://github.com/apache/calcite/blob/57ad4ffb1ed9b86d18fcfd7627fdf5c4227bc172/core/src/test/java/org/apache/calcite/rex/RexProgramTest.java#L1078-L1079",
-  "error_exposed": "Keeping only weight_kg >= 15 includes row 3 (weight 16). Keeping only weight_kg <= 15 includes row 1 (weight 14)."
-}
-```
-
-## 6. Sign-off
-
-- [ ] From one CLI command, a teammate can run a development task, inspect the first candidate, reproduce the feedback and identify the returned SQL.
-- [ ] All retry and terminal paths have deterministic scripted checks. The real verifier and live model have been piloted on development families A2, B3, C1, D1 and E2 before freezing.
-- [ ] The evaluation lead can compute the expected E2 scores from the logs without an API call. The frozen configuration describes output parsing, resource limits and infrastructure-error handling.
-- [ ] Nine families have four reviewed tasks each. Your review of the evaluation lead’s eight families is complete.
+**Acceptance:** nine families × four reviewed tasks, strict size reduction and correct family split. The verifier lead has reviewed yours and your review of evaluation's families is complete.
