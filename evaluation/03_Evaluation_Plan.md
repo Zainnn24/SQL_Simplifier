@@ -1,122 +1,39 @@
-# Task 3 · Build the benchmark and evaluate the verifier and LLM
+# Evaluation lead — deliverables
 
-**First task.** Check the sample rows and expected query outputs for the two completed JSON records, `B3-01` and `C1-01`, in §1. The independent verifier fixtures and the scorer for the E2 trace come later in Experiments A and B.
+Your deliverables make the benchmark, verifier checks and model results reproducible. You own **`evaluate_encoded_row()`**, the small-domain enumeration driver and independent DuckDB comparisons. The verifier lead supplies the production encoder through `encode_query()`; you do not need to implement SQL-to-Z3 translation.
 
-| You own | You receive | You hand off |
+| You receive | You deliver | Recipient |
 | --- | --- | --- |
-| Benchmark format, review, family split, independent verifier evaluation (Experiment A), frozen LLM evaluation (Experiment B) | Task contributions from both leads, the direct checker, model attempt logs and final run records | A validated 100-task benchmark, separate controls and verifier fixtures, scoring scripts, results tables and replayable error examples |
-| Families B3–B5 and C1–C5 | Eight existing SQL seeds | 32 tasks including 24 new variants, reviewed by the pipeline lead. You review the verifier lead’s 32 tasks and integrate all 100. |
+| Task contributions from all three roles, SQL seeds and shared record formats | Your 32 tasks, benchmark validator, reviewed 100-task manifest and family split | LLM lead and team |
+| Verifier's `validate_input`, `verify`, `encode_query`, types and InputError | Independent fixtures, row evaluator, DuckDB comparisons, Experiment A results and discrepancy reports | Verifier lead and team |
+| LLM single/batch runner, frozen configuration and JSONL logs | Scorer, official Experiment B results and reproduction/report materials | Team |
 
-Use the common JSON fields in §1 when exchanging benchmark tasks. The command names in later sections are suggested implementation choices. The counts, split and measurement goals follow the project documents.
+Use the [team contract](../README.md#4-shared-benchmark-and-experiment-decisions) for full schemas and interface definitions. Start by checking the supplied B3-01/C1-01 records and building independent fixtures. Build the scorer against the scripted E2 log while the verifier and live model adapter are in progress.
 
-## 1. Check the two prepared seed records
+## D1. Validated benchmark, your 32 tasks and cross-review
 
-Open the SQL seed file in data folder and search for the headings `-- E2.`, `-- B3.` and `-- C1.`. `E2`, `B3` and `C1` are family labels in that file. The suffix `-01` names the first task in a family, which is the runnable SQL block already under that heading. Thus `E2-01` is the jobs example, `B3-01` is the parcels example and `C1-01` is the samples example. Each block includes its schema, inserts, original query and smaller reference and can run on its own in DuckDB.
+**Receive:** [B3-01.json](B3-01.json), [C1-01.json](C1-01.json), all 25 [SQL seeds](../data/SQL_Predicate_Family_Examples.sql), contributions from both leads, and the shared [task/review formats](../README.md#44-benchmark-review-and-verifier-fixture-formats).
 
-Use one record per simplification task. Store the schema and original query as the model-facing payload; join the offline review fields by task ID. The runner may use the ID to locate a task. The prompt builder receives only the clean schema and original SQL. A seed’s original and reference are **one** task.
+**Implement:** a loader and benchmark validation command:
 
-### B3-01 and C1-01 ready for review
+```text
+python -m evaluation validate-benchmark --manifest benchmark.jsonl
+```
 
-The complete records are also supplied as `B3-01.json` and `C1-01.json` below and in the evaluation folder. For this first task:
+The command is a target to implement. First compare every sample row with its seed INSERT, create a fresh DuckDB table and run original/reference separately. Compare both outputs to the author's expected unordered multiset, retaining duplicate rows.
 
-1. Compare every `sample_rows` entry with the INSERT under the matching SQL heading, including the row ID.
-2. Load those rows into a fresh DuckDB table created with `schema_sql`. Run `original_sql` and `reference_sql` separately. Compare each output with `expected_rows` as an unordered multiset, preserving repeated rows.
-
-| Record | Input rows | Expected row IDs from each SELECT | Boundary to check |
+| First record | Input rows | Expected row IDs from both SELECTs | Boundary check |
 | --- | ---: | --- | --- |
-| `B3-01` | 4 | 2, 4 | Both parcels of weight 15 qualify. Weights 14 and 16 fall outside the filter. |
-| `C1-01` | 10 | 2, 3, 4, 5, 6, 7, 10 | Reading 40 qualifies in the separate interval. Readings 26 and 39 fall in the gap. |
+| B3-01 | 4 | 2, 4 | Both weight-15 parcels qualify; weights 14 and 16 do not |
+| C1-01 | 10 | 2, 3, 4, 5, 6, 7, 10 | Reading 40 belongs to the separate interval; 26 and 39 remain excluded |
 
-**B3-01 · Bounds pin one value**
+Use these as base-record examples; completed metadata and independent review remain necessary. Package the other seeds, including E2-01 for integration. Keep reference solutions, samples, reasoning and review metadata offline; the prompt builder receives only cleaned schema and original SQL.
 
-```json
-{
-  "task_id": "B3-01",
-  "family": "B3",
-  "split": "dev",
-  "schema_sql": "CREATE TABLE parcels (row_id BIGINT NOT NULL, weight_kg BIGINT NOT NULL)",
-  "original_sql": "SELECT row_id FROM parcels WHERE weight_kg >= 15 AND weight_kg <= 15",
-  "reference_sql": "SELECT row_id FROM parcels WHERE weight_kg = 15",
-  "sample_rows": [
-    {"row_id": 1, "weight_kg": 14},
-    {"row_id": 2, "weight_kg": 15},
-    {"row_id": 3, "weight_kg": 16},
-    {"row_id": 4, "weight_kg": 15}
-  ],
-  "expected_rows": [[2], [4]],
-  "derivation": "The two inclusive bounds pin weight_kg to 15. Both parcels with that weight qualify.",
-  "source": "SQL_Predicate_Family_Examples.sql, B3. Adapted from Apache Calcite RexProgramTest.java, https://github.com/apache/calcite/blob/57ad4ffb1ed9b86d18fcfd7627fdf5c4227bc172/core/src/test/java/org/apache/calcite/rex/RexProgramTest.java#L1078-L1079",
-  "error_exposed": "Keeping only weight_kg >= 15 includes row 3 (weight 16). Keeping only weight_kg <= 15 includes row 1 (weight 14)."
-}
-```
-
-**C1-01 · Merge overlapping intervals**
-
-```json
-{
-  "task_id": "C1-01",
-  "family": "C1",
-  "split": "dev",
-  "schema_sql": "CREATE TABLE samples (row_id BIGINT NOT NULL, reading BIGINT NOT NULL)",
-  "original_sql": "SELECT row_id FROM samples WHERE (reading >= 10 AND reading <= 20) OR (reading >= 18 AND reading <= 25) OR reading >= 40",
-  "reference_sql": "SELECT row_id FROM samples WHERE (reading >= 10 AND reading <= 25) OR reading >= 40",
-  "sample_rows": [
-    {"row_id": 1, "reading": 9},
-    {"row_id": 2, "reading": 10},
-    {"row_id": 3, "reading": 17},
-    {"row_id": 4, "reading": 18},
-    {"row_id": 5, "reading": 20},
-    {"row_id": 6, "reading": 21},
-    {"row_id": 7, "reading": 25},
-    {"row_id": 8, "reading": 26},
-    {"row_id": 9, "reading": 39},
-    {"row_id": 10, "reading": 40}
-  ],
-  "expected_rows": [[2], [3], [4], [5], [6], [7], [10]],
-  "derivation": "The inclusive intervals [10, 20] and [18, 25] overlap, so their union is [10, 25]. The separate interval starting at 40 also qualifies.",
-  "source": "SQL_Predicate_Family_Examples.sql, C1. Adapted from Apache Calcite RexProgramTest.java, https://github.com/apache/calcite/blob/57ad4ffb1ed9b86d18fcfd7627fdf5c4227bc172/core/src/test/java/org/apache/calcite/rex/RexProgramTest.java#L1619-L1635",
-  "error_exposed": "Dropping reading >= 40 loses row 10 (reading 40). Extending the merged interval through the gap incorrectly includes row 8 (26) or row 9 (39)."
-}
-```
-
-### Later authoring example and family split
-
-The following worked example is a proposed new B3 development variant. The original seed `B3-01` uses inclusive bounds with a positive endpoint. Here the same reasoning appears under NOT at a negative endpoint; the middle row catches a rewrite that mistakenly includes that value.
-
-```json
-{
-  "task_id": "B3-02",
-  "family": "B3",
-  "split": "dev",
-  "schema_sql": "CREATE TABLE readings (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
-  "original_sql": "SELECT row_id FROM readings WHERE NOT (x >= -2 AND x <= -2)",
-  "reference_sql": "SELECT row_id FROM readings WHERE x != -2",
-  "sample_rows": [{"row_id": 1, "x": -3}, {"row_id": 2, "x": -2}, {"row_id": 3, "x": -1}],
-  "expected_rows": [[1], [3]],
-  "derivation": "Team variant of B3-01. The two inclusive bounds pin x to -2; negation excludes that point.",
-  "source": "SQL_Predicate_Family_Examples.sql, B3",
-  "error_exposed": "Returning TRUE incorrectly includes row 2."
-}
-```
-
-For E tasks, require an additional offline record naming the CHECK to remove, the relaxed-schema witness and the two expected truth values. Compare query outputs as unordered multisets of projected rows, keeping duplicates. The verifier’s size rule gives the proposed B3-02 variant 8 → 3 nodes.
-
-| Owner | Families | Seeds + new | Total | Development families |
-| --- | --- | ---: | ---: | --- |
-| Verifier | D3–D5, E1–E5 | 8 + 24 | 32 | E2 |
-| LLM pipeline | A1–A5, B1–B2, D1–D2 | 9 + 27 | 36 | A2, D1 |
-| Benchmark and evaluation | B3–B5, C1–C5 | 8 + 24 | 32 | B3, C1 |
-| **All** | **25 families** | **25 + 75** | **100** | **5 whole families / 20 tasks** |
-
-Assign variants 01–04 to the same family and split. Reserve the remaining **20 families / 80 tasks** for final testing. Keep already-simple inputs, unsupported inputs, inconsistent schemas and deliberately wrong verifier candidates in separate files. The main benchmark is designed to have a reviewed smaller equivalent answer for every task.
-
-## 2. Form your eight families and review the full benchmark
-
-Use the seed SQL as variant 01. The directions below are suggestions for variants 02–04. For every task, construct a legal sample that exposes a plausible wrong rewrite. Record the specific larger or smaller set of rows that mistake would select.
+Author your B3–B5 and C1–C5 families: retain each seed as variant 01 and add three meaningful variants. The [shared B3-02 example](../README.md#b3-02-authoring-example) uses `NOT (x >= -2 AND x <= -2)` → `x != -2`, 8 → 3 nodes, and remains a draft to review.
 
 | Family | Variant 02 | Variant 03 | Variant 04 |
 | --- | --- | --- | --- |
-| B3 · bounds pin one value **(dev)** | Use the negated, negative-endpoint example above | Put the pinned interval beside a live range | Pin one column while retaining an independent comparison on another |
+| B3 · bounds pin one value **(dev)** | Use B3-02 from the shared examples: NOT at a negative endpoint | Put the pinned interval beside a live range | Pin one column while retaining an independent comparison on another |
 | B4 · exclude an endpoint | Exclude an upper endpoint | Turn an inclusive bound into a strict one inside a two-sided interval | Keep a live OR branch beside an endpoint exclusion |
 | B5 · BIGINT type limit | Use the signed minimum lower bound | Use a strict comparison beyond which no legal value exists, e.g. `x > 9223372036854775807` | Put an always-true type bound under AND with a genuine restriction |
 | C1 · merge overlapping intervals **(dev)** | Chain three overlapping intervals | Keep a separate interval across a one-integer gap | Merge intervals inside a branch controlled by a second column |
@@ -125,16 +42,104 @@ Use the seed SQL as variant 01. The directions below are suggestions for variant
 | C4 · outer bound removes a branch | Use an upper bound to eliminate the right branch | Use three branches with two survivors | Use an outer bound that also clips the surviving interval |
 | C5 · excluded point in a gap | Remove two exclusions inside one gap | Preserve a second exclusion inside a live range | Put the redundant exclusion inside one branch, with another independent branch |
 
-**Review procedure for each submission**
+For every contributed task, use this review procedure:
 
-1. Run the DDL in a fresh DuckDB database. Insert the legal samples; compare the original and hidden reference to the **author’s expected multiset**. Check endpoints, values just outside them and any surviving OR branch. In the existing C1 seed, reading 40 must still be returned; a candidate that merges the first two intervals and drops the separate tail fails on this row.
-2. Ask a second person to explain why the reference is equivalent on every legal row and why the chosen variation still belongs to its family. After Experiment A, run the checker on each reference and enforce strict size reduction. Sample agreement alone cannot establish this property.
-3. Record the upstream rule/test and what the author adapted, or the seed and derivation for a team variant. Flag likely duplicates using a normalized predicate structure, accounting for renamed columns, commuted operands and literal relationships. Inspect flagged tasks with their schema and boundary intent. Replace variants that merely rename identifiers or change constants without exercising a new case.
-4. Apply the review rotation: you review the verifier lead’s families, the verifier lead reviews the pipeline lead’s families, and the pipeline lead reviews yours. Validate 25 unique family IDs, exactly four tasks per family, disjoint family sets across splits, unique task IDs, complete fixtures and 20/80 totals. When adapting an external test, preserve its provenance; a structurally duplicated example contributes only once to reported coverage.
+1. Run DDL and legal samples in DuckDB. Compare each SELECT to the author's expected multiset. Check exact endpoints, adjacent values and every surviving OR branch. Include duplicate projected rows and multi-column projection controls in the verifier tests.
+2. Obtain another person's explanation of equivalence on every legal row and family membership. Once Experiment A is validated, use `verify(..., timeout_ms=...)` on each reference and require strict node reduction. Sample agreement alone does not establish equivalence.
+3. Record source/test adaptation or derivation and the concrete error each variant exposes. Flag normalized structural duplicates, including renaming, commuted operands and literal relationships; inspect flags with schema and boundary intent. Replace cosmetic variants.
+4. Collect separate benchmark_reviews.jsonl records. You review verifier's tasks, verifier reviews LLM's tasks, and LLM reviews yours. An E-family record also needs the counterexample after removing its specified CHECK: confirm the schema changes only by that removal, the row satisfies every remaining constraint and original/reference outputs differ. This row is not a legal original-schema sample or model feedback.
+5. Validate 25 unique families, exactly four tasks each, unique task IDs, complete approved reviews and the [20/80 family split](../README.md#46-benchmark-split-review-and-integration-milestones). Use A2, B3, C1, D1 and E2 for development; freeze the remaining 20 families for testing. Keep already-simple inputs, unsupported queries, contradictory schemas and deliberately wrong candidates in separate control files.
 
-## 3. Run Experiment A — can we trust the verifier?
+**Hand off:** your 32 records to the LLM lead for review; reviewed integrated manifest, review metadata and family split to the LLM runner; review corrections to the verifier lead. Original/reference pairs count once, and external structural duplicates contribute only once to coverage.
 
-Build expected answers **independently** of the SQL-to-Z3 translator. For known-equivalent pairs write a short logical justification; for unequal pairs supply a hand-checked legal distinguishing row. Keep a labeled verdict even if the solver finds a different witness. Include controls for invalid SQL, unsupported syntax, a changed projection and an inconsistent CHECK.
+**Acceptance:** B3-01/C1-01 match their fixtures; all 100 task records and reviews pass one validation command; each reference is equivalent and smaller; family totals and split are exact. Samples, references and review fields never enter model prompts.
+
+## D2. Row evaluator, independent fixtures and Experiment A
+
+**Receive:** the following functions from the verifier lead, together with [ValidationResult](../README.md#validationresult), [CheckResult](../README.md#checkresult), [EncodedQuery](../README.md#encodedquery) and [InputError](../README.md#encoding-validation-and-inputerror):
+
+```python
+def validate_input(
+    schema_sql: str,
+    original_sql: str,
+    *,
+    timeout_ms: int,
+) -> ValidationResult:
+    ...
+
+
+def verify(
+    schema_sql: str,
+    original_sql: str,
+    candidate_sql: str,
+    *,
+    timeout_ms: int,
+) -> CheckResult:
+    ...
+
+
+def encode_query(schema_sql: str, query_sql: str) -> EncodedQuery:
+    ...
+```
+
+`encode_query` returns the column-to-Z3-integer mapping, schema_constraint, predicate and predicate_nodes from the same translation used by production verify. All expressions share that result's symbols and context. These live Python objects are not JSON. Encoding validates syntax/types but does not reject a supported contradictory schema by checking satisfiability.
+
+**Implement and export from `evaluation`:**
+
+```python
+def evaluate_encoded_row(
+    schema_sql: str,
+    query_sql: str,
+    row: dict[str, int],
+    *,
+    timeout_ms: int,
+) -> EncodedRowResult:
+    ...
+```
+
+This is your deliverable. It supplies the tested side of the comparison; independently executed DuckDB supplies reference observations. Use [EncodedRowResult](../README.md#encodedrowresult), including the distinct EVALUATED/INVALID_INPUT/INCONCLUSIVE/EVALUATION_ERROR statuses.
+
+### Suggested implementation of the row evaluator
+
+1. Call `encode_query`. Check that the row maps exactly every declared column to an integer, excluding booleans/nulls. Map InputError or malformed row input to INVALID_INPUT. Preserve out-of-range integer row values for schema-legality tests; SQL literals still follow the supported range rule.
+2. Construct a Z3 solver in the returned expressions' context. Add only bindings of the form `column_symbol == supplied_value` for all columns, and set its check timeout from timeout_ms.
+3. Do **not** assert schema_constraint or predicate when obtaining the model. A CHECK-violating row or false predicate must still be evaluable; asserting them would turn such a test into UNSAT and hide the values being tested.
+4. After SAT, use `model.eval()` separately on schema_constraint and predicate. Convert concrete Z3 true/false to Python booleans. Complete row bindings should leave neither expression symbolic; a symbolic result or unexpected failure is EVALUATION_ERROR. Do not silently fill missing columns with model-completion defaults.
+5. Return EVALUATED with both booleans and null diagnostic. A row violating CHECKs/bounds yields schema_holds=false, not a source-input error. UNKNOWN/timeout gives INCONCLUSIVE; error results have null truth fields and a diagnostic. A supported contradictory schema evaluates false on every row.
+
+Z3 is calculating the expressions supplied by the translator here. It does not decide whether that translation matches the SQL. Your comparison driver makes that decision using independent execution:
+
+| Check | Z3 side | Independent DuckDB side |
+| --- | --- | --- |
+| Row legality | Encoded schema_constraint on the fixed row | Insert the same row into a table with the original DDL; recognize actual CHECK/type violations separately from infrastructure errors |
+| Predicate truth on a legal row | Encoded predicate on that row | Evaluate the original SQL WHERE expression as a Boolean SELECT over the inserted row, without filtering the row away |
+| Pair equivalence over a finite domain | `verify` with explicit restrictions to that same domain | Enumerate all legal rows and check whether any original/candidate truth values differ |
+
+DuckDB must execute the input SQL expressions, not expressions regenerated from the Z3 encoding. You may parse SQL to isolate its WHERE text; do not reuse translator outputs as expected answers. Compare schema legality for every row and predicate truth on legal rows. For an illegal row, the encoded predicate can still be calculated, but the failed table insert does not provide a DuckDB predicate observation.
+
+A fixed-row predicate result of false means that row does not satisfy that predicate. It is different from the SAT/UNSAT answer to a two-query disagreement formula. For example, SQL `x >= 10` on x=10 is true in DuckDB. If the translator mistakenly encodes `x > 10`, Z3 correctly calculates false for the wrong expression; the comparison exposes the translation bug.
+
+### Small-domain exhaustive testing suggestion
+
+`evaluate_encoded_row` evaluates **one row per call**. Your driver repeatedly calls it across many rows and expressions. Start with one or two relevant columns and enumerate the Cartesian product of `{-2,-1,0,1,2}`:
+
+| Enumerated columns | Assignments | Other columns |
+| --- | ---: | --- |
+| x | 5 | Supply explicit fixed values for every remaining column |
+| x, y | 25 | For example, fix row_id=1 when it is irrelevant to predicates/CHECKs |
+| k columns | 5^k | Grow deliberately; report which domains were actually exhausted |
+
+For x and y this includes (-2,-2), (-2,-1), through (2,2), not just pairs with x=y. Each supplied row still contains all declared columns. Keep the domains/fixed values in the [fixture enumeration object](../README.md#independent-verifier-cases). Use cases with constants near this domain to exercise both truth outcomes. Also test around actual thresholds: a predicate `x >= 10` needs 9, 10 and 11; testing only -2 through 2 would miss its boundary.
+
+Cover all six comparisons, column-to-column comparisons, negative literals, TRUE/FALSE, AND/OR/NOT, nesting/precedence and multiple CHECKs. Include rows satisfying and violating the checks. Test full-width BIGINT minimum/maximum and adjacent values separately; out-of-range row values check that type bounds are present.
+
+For each valid pair fixture, enumerate DuckDB legality and both predicate truth values. If no legal assignment exists, the bounded expected result is UNSAT_SCHEMA; if any legal assignment distinguishes the predicates, it is DIFFERENT; otherwise it is EQUIVALENT. Compare with verify after adding explicit row-local CHECKs that describe exactly the enumerated domains **and all fixed values**. A domain can be expressed as `x = -2 OR x = -1 OR x = 0 OR x = 1 OR x = 2`; add equality CHECKs for fixed columns. Keep the original schema unchanged in the unrestricted test. Do not compare a bounded result to an unrestricted fixture label: disagreement might exist only outside the enumerated domain.
+
+This tests translator behavior across the enumerated inputs, not all BIGINT values. Pair it with the verifier lead's structural translation argument and independent full-range boundary/constraint fixtures.
+
+### Independent fixtures and verdict/replay checks
+
+Create `verifier_cases.jsonl` using the shared format, with logical explanations for equivalent pairs and hand-checked legal distinguishing rows for unequal pairs. Prepare these expected answers independently of the production translator. Include unsupported SQL, changed projection and inconsistent-schema controls.
 
 | Fixture to build | Independent answer | Defect it can expose |
 | --- | --- | --- |
@@ -144,16 +149,31 @@ Build expected answers **independently** of the SQL-to-Z3 translator. For known-
 | `x <= 9223372036854775807` vs. TRUE; `x > -9223372036854775808` vs. TRUE | First equivalent; second unequal at the signed minimum | Bound omission, literal sign or precision error |
 | `CHECK (x < 0)` and `CHECK (x >= 0)` together | Schema admits no row | Accidental acceptance through vacuous equivalence |
 
-**Exhaustive differential check.** Start with one or two relevant columns and the domain `{-2,-1,0,1,2}`. Enumerate all assignments. Compare DuckDB and the encoder on schema legality; for each legal row compare each predicate’s truth value in DuckDB with the encoded value for that same fixed row. Then determine pair equivalence by asking whether any legal enumerated row differs. Compare with the checker using explicit domain bounds on the same columns. If there are no legal rows, the expected status is `UNSAT_SCHEMA`. Test full-width BIGINT endpoints in separate fixtures.
+Implement `python -m evaluation check-verifier --fixtures verifier_cases.jsonl --timeout-ms 5000`; the timeout value is a configurable development example. Compare two directions of wrong verdicts (unequal labeled equivalent; equivalent labeled unequal), inconclusives, controls and row-level translation mismatches. Use **all SAT disagreement models**, including REPLAY_ERROR cases, as the denominator for confirmed replay rate. Preserve schema, SQL, row, expected/actual results and configuration for each discrepancy; unexpected failures must not be scored as successful checks.
 
-Record two wrong-verdict counts (unequal labeled equivalent; equivalent labeled unequal), inconclusive checks, schema/control outcomes and row-level translation mismatches. For the replay rate, use **all SAT disagreement models** as the denominator, including attempts whose replay failed. Preserve the schema, two queries and row for every discrepancy. Resolve verdict/replay discrepancies with the verifier lead and rerun affected tests before starting Experiment B.
+**Hand off:** the row evaluator, enumeration/DuckDB driver, independent fixtures and Experiment A tables to the team; reproducing discrepancy reports to verifier. The verifier lead supplies fixes and regressions. Tests can be developed before the real encoder is available, but actual translator validation must use that production encoder.
 
-## 4. Run Experiment B — how well does the model simplify?
+**Acceptance:** legal/illegal fixed-row cases, finite-domain pair decisions, independent full-range labels and BIGINT endpoint tests agree. Every equivalence fixture has at least one legal row, except explicit UNSAT_SCHEMA controls. Any verdict or replay discrepancy is investigated and affected tests rerun before Experiment B. Record inconclusive outcomes separately.
 
-1. Pilot on the 20 development tasks. First score the scripted E2 trace: `DIFFERENT` at attempt 1, then `EQUIVALENT` and 7 → 3 at attempt 2. Expected values are 0 first-equivalent, 0 first-smaller, 1 final success, 1 recovery, 2 calls and 4 nodes removed. Check a copy-on-first-attempt trace separately. Store scripted and verifier-fixture runs outside measured model results.
-2. Freeze the benchmark manifest, prompt, model ID, sampling settings, output parser, verifier/software versions, solver timeout, four-call cap and failure-handling policy. Keep a configuration ID on every result. Only development tasks inform adjustments.
-3. Run the frozen pipeline three times per held-out task (80 × 3 = 240 scheduled runs). Reset model context each time. Use records keyed by task, repetition and attempt. Reconcile expected IDs and terminal records before computing totals. Keep service failures and replay discrepancies visible; record missing runs and their reason.
-4. Build the following table **for each repetition over its 80 scheduled tasks**. Report counts with denominators. If pooling across 240, label it as repeated runs of the same 80 tasks. Break down by category/family and use real replayed model errors for the qualitative analysis.
+## D3. Log scorer and official Experiment B results
+
+**Receive:** the LLM lead's single/batch runner, prompt/parser/configuration, scripted E2 and copied-first-answer traces, and actual model logs; D1's manifest and validated verifier from Experiment A.
+
+**Implement:** a scorer for [the shared JSONL format](../README.md#jsonl-record-formats). Join records to the frozen manifest/configuration, distinguish pipeline outcomes from nested CheckResult statuses, reconcile attempt numbers/calls and require exactly one terminal record per run. Do not discard missing, duplicate, failed or incomplete runs silently.
+
+```text
+python -m evaluation score --manifest benchmark.jsonl --logs results/
+```
+
+First score the scripted E2 trace: first-equivalent=0, first-smaller=0, final success=1, recovery=1/1, calls=2 and nodes removed=4. A copied first answer counts for first equivalence but not first simplification. Keep scripted runs and deliberate verifier errors outside measured model data.
+
+Pilot on the 20 development tasks. With the LLM lead, freeze the model, sampling settings, prompt, response parser, benchmark version, software/code versions, solver timeout, request timeout, four-call cap and failure-handling policy. Only development tasks inform changes. Evaluation executes the official run using the delivered LLM batch runner; do not implement a second model loop:
+
+```text
+python -m LLM_pipeline batch --manifest benchmark.jsonl --split test --repeats 3 --config frozen.json --output results/test/
+```
+
+Schedule 80 held-out tasks × 3 repetitions = 240 runs with fresh model contexts. Reconcile scheduled IDs and terminal records before scoring. Report the following **for each repetition over its 80 scheduled tasks**; pooled results must be labeled repeated runs of the same tasks.
 
 | Measure | Calculation |
 | --- | --- |
@@ -164,19 +184,18 @@ Record two wrong-verdict counts (unequal labeled equivalent; equivalent labeled 
 | Amount of simplification | For accepted runs, report original minus accepted nodes and percentage reduction relative to original. State the accepted-run count; the hidden reference supplies one valid target. |
 | Outcomes and resource use | Tabulate confirmed disagreements, invalid candidates, inconclusives, replay errors, infrastructure issues and missing data. Label counts by attempt or by run. Report calls, elapsed time and available token usage across runs, including failures. |
 
-Do not count deliberate Experiment A errors as LLM mistakes. When describing recovery, show the original, first candidate, actual replayed row and accepted revision when available. These traces describe what happened during retries; the project has one pipeline and does not estimate the causal effect of a feedback strategy.
+Attempt-level verifier outcomes are in check_result.status for CHECKED attempts. OUTPUT_ERROR is a pipeline extraction failure and is reported with invalid-output counts but is not a fabricated verifier verdict; API_ERROR and INCOMPLETE are separate infrastructure outcomes. For first-attempt metrics, a run with no first check earns no verified success and remains visible in the scheduled denominator. Recovery is restricted to confirmed first-attempt DIFFERENT cases; show numerator and denominator and use N/A when the denominator is zero.
 
-### Make the results reproducible
+**Hand off:** reproducible scores, repeat/category/family tables, resource totals and selected actual model-error traces to the team. Use original query, candidate, replayed row and accepted revision where available to explain errors. Recovery describes the full retry process and does not establish a causal effect of feedback.
 
-| Suggested entry point | Input | Output to inspect |
-| --- | --- | --- |
-| `python -m evaluation validate-benchmark --manifest benchmark.jsonl` | All authored records, split and review metadata | Per-task fixture/reference failures, counts by owner and split, duplicate flags |
-| `python -m evaluation check-verifier --fixtures verifier_cases.jsonl` | Independent labels and enumeration domains, plus the real checker | Verdict confusion counts, row-level mismatches, SAT models and confirmed replays |
-| `python -m evaluation score --manifest benchmark.jsonl --logs results/` | Frozen test IDs, attempt logs and terminal records | Per-repeat results, missing/duplicate runs, family breakdowns and traceable error examples |
+**Acceptance:** scores reproduce the scripted expectations and all three test repetitions from saved logs without another model call. All scheduled runs are accounted for, and statuses, repeated attempts, fallbacks, missing usage and missing records remain visible.
 
-## 5. Sign-off
+## D4. Reproduction package and report materials
 
-- [ ] One validation command checks the schema of all records, provenance, independent review, sample outputs, reference sizes and the frozen split.
-- [ ] Experiment A produces its verdict table, bounded-domain comparison and replay counts from saved fixtures. Every discrepancy is traceable.
-- [ ] The scoring script reproduces the E2 expected measurements and builds the three held-out result tables from saved logs without another model call.
-- [ ] The final report includes the benchmark manifest, frozen configuration, repeat-level denominators, outcome breakdowns, structural reductions, resource use and illustrative replayed errors. Include any unresolved or missing measurements with their scope.
+**Receive:** D1–D3 artifacts, verifier's translation argument/regression evidence and the LLM lead's runnable E2 demonstration.
+
+**Implement:** assemble the final benchmark/reviews, independent fixtures, frozen configuration and prompt/parser artifacts, raw logs, scoring outputs and commands needed to reproduce them. Reference exact code and dependency versions. Separate scripted development traces from measured model results. Document remaining inconclusive or missing measurements with their scope.
+
+**Hand off:** the reproduction package, Experiment A/B tables and error-analysis material to the team for the report; coordinate the demo with the LLM lead and include verifier's translation explanation. Each role supplies its own implementation details and evidence.
+
+**Acceptance:** another teammate can validate the benchmark, rerun Experiment A and regenerate reported model scores from saved logs using the documented commands. The report includes repeat-level denominators, outcome breakdowns, structural reductions, resource use and illustrative replayed errors. The E2 demo exercises verifier, pipeline and scorer together.
