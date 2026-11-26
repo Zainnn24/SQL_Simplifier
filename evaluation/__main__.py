@@ -1,6 +1,6 @@
 """Run evaluation utilities from the repository root."""
 
-from .sample_check import main
+from .cli import main
 
 
 if __name__ == "__main__":

@@ -1,0 +1,34 @@
+{
+  "dependency_versions": {
+    "duckdb": "2.0.1",
+    "python": "3.13.7",
+    "sqlglot": "30.35.0",
+    "z3-solver": "5.4.1.0"
+  },
+  "exit_code": 2,
+  "fixture_sha256": "87452ff3baac9d3a83243cc0632a1ccdf1d1a6ab42aaed0493f9c6fcd3234613",
+  "fixtures_file": "evaluation/verifier_cases.jsonl",
+  "mode": "production",
+  "production": {
+    "diagnostic": "Production verifier is missing required interfaces: validate_input (must be callable), verify (must be callable), encode_query (must be callable), InputError (must be a ValueError subclass)",
+    "metrics": {
+      "confirmed_replay_rate": null,
+      "confirmed_replays": null,
+      "false_different": null,
+      "false_equivalent": null,
+      "inconclusive_checks": null,
+      "row_errors": null,
+      "row_inconclusive": null,
+      "row_mismatches": null,
+      "sat_disagreement_models": null
+    },
+    "missing_interfaces": [
+      "validate_input",
+      "verify",
+      "encode_query",
+      "InputError"
+    ],
+    "run_status": "NOT_RUN"
+  },
+  "timeout_ms": 5000
+}

@@ -1,0 +1,1412 @@
+{
+  "dependency_versions": {
+    "duckdb": "2.0.1",
+    "python": "3.13.7",
+    "sqlglot": "30.35.0",
+    "z3-solver": "5.4.1.0"
+  },
+  "exit_code": 0,
+  "fixture_sha256": "87452ff3baac9d3a83243cc0632a1ccdf1d1a6ab42aaed0493f9c6fcd3234613",
+  "fixtures_file": "evaluation/verifier_cases.jsonl",
+  "mode": "fixtures_only",
+  "offline": {
+    "cases": [
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 9
+        },
+        "case_id": "e2-ordering-equivalent",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "end_day": 9,
+              "row_id": 1,
+              "start_day": 10
+            },
+            {
+              "end_day": 9,
+              "row_id": 1,
+              "start_day": 11
+            }
+          ],
+          "distinguishing_rows": 2,
+          "errors": [],
+          "legal_rows": 9,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 9
+        },
+        "case_id": "e2-check-removed",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "end_day": 9,
+            "row_id": 1,
+            "start_day": 10
+          },
+          "schema_sql": "CREATE TABLE jobs (row_id BIGINT NOT NULL, start_day BIGINT NOT NULL, end_day BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "end_day": 10,
+              "row_id": 1,
+              "start_day": 9
+            },
+            {
+              "end_day": 11,
+              "row_id": 1,
+              "start_day": 9
+            }
+          ],
+          "distinguishing_rows": 2,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 9
+        },
+        "case_id": "e2-wrong-end-bound",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "end_day": 10,
+            "row_id": 1,
+            "start_day": 9
+          },
+          "schema_sql": "CREATE TABLE jobs (row_id BIGINT NOT NULL, start_day BIGINT NOT NULL, end_day BIGINT NOT NULL, CHECK (start_day <= end_day))"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": 0
+            }
+          ],
+          "distinguishing_rows": 1,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 5
+        },
+        "case_id": "lower-bound-strict",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": 0
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": 0
+            }
+          ],
+          "distinguishing_rows": 1,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 5
+        },
+        "case_id": "upper-bound-strict",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": 0
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 5
+        },
+        "case_id": "equality-negated",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 25,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 25
+        },
+        "case_id": "column-order-reversal",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 5
+        },
+        "case_id": "nested-not",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 12,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 12
+        },
+        "case_id": "precedence-equivalent",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": 1,
+              "y": -1
+            },
+            {
+              "row_id": 1,
+              "x": 1,
+              "y": 0
+            }
+          ],
+          "distinguishing_rows": 2,
+          "errors": [],
+          "legal_rows": 12,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 12
+        },
+        "case_id": "precedence-wrong",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": 1,
+            "y": 0
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL, y BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 5
+        },
+        "case_id": "boolean-constant-true",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [],
+          "status": "EQUIVALENT",
+          "total_rows": 5
+        },
+        "case_id": "false-query-supported",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 6
+        },
+        "case_id": "bigint-maximum",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 6
+        },
+        "case_id": "bigint-minimum",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": -9223372036854775808
+            }
+          ],
+          "distinguishing_rows": 1,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 6
+        },
+        "case_id": "bigint-minimum-strict",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": -9223372036854775808
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": 9223372036854775806
+            }
+          ],
+          "distinguishing_rows": 1,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 6
+        },
+        "case_id": "bigint-maximum-neighbor",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": 9223372036854775806
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 9,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 25
+        },
+        "case_id": "multiple-checks",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 0,
+          "original_rows": [],
+          "status": "UNSAT_SCHEMA",
+          "total_rows": 3
+        },
+        "case_id": "contradictory-checks",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "UNSAT_SCHEMA",
+        "scope_status": null
+      },
+      {
+        "bounded": null,
+        "case_id": "unsupported-original-arithmetic",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_INPUT",
+        "scope_status": "INVALID_INPUT"
+      },
+      {
+        "bounded": null,
+        "case_id": "malformed-schema",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_INPUT",
+        "scope_status": "INVALID_INPUT"
+      },
+      {
+        "bounded": null,
+        "case_id": "candidate-arithmetic",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_CANDIDATE",
+        "scope_status": "INVALID_CANDIDATE"
+      },
+      {
+        "bounded": null,
+        "case_id": "candidate-syntax",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_CANDIDATE",
+        "scope_status": "INVALID_CANDIDATE"
+      },
+      {
+        "bounded": null,
+        "case_id": "candidate-projection-change",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_CANDIDATE",
+        "scope_status": "INVALID_CANDIDATE"
+      },
+      {
+        "bounded": null,
+        "case_id": "candidate-projection-order",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_CANDIDATE",
+        "scope_status": "INVALID_CANDIDATE"
+      },
+      {
+        "bounded": null,
+        "case_id": "candidate-table-change",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "INVALID_CANDIDATE",
+        "scope_status": "INVALID_CANDIDATE"
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 5
+        },
+        "case_id": "bounded-agreement-only",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": 3
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 5,
+          "original_rows": [
+            [
+              1,
+              0
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              1,
+              2
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 5
+        },
+        "case_id": "multi-column-projection",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              7
+            ],
+            [
+              7
+            ]
+          ],
+          "distinguishing_examples": [],
+          "distinguishing_rows": 0,
+          "errors": [],
+          "legal_rows": 2,
+          "original_rows": [
+            [
+              7
+            ],
+            [
+              7
+            ]
+          ],
+          "status": "EQUIVALENT",
+          "total_rows": 2
+        },
+        "case_id": "repeated-projection",
+        "counterexample_replay": null,
+        "errors": [],
+        "expected_status": "EQUIVALENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": 9223372036854775807
+            }
+          ],
+          "distinguishing_rows": 1,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 6
+        },
+        "case_id": "bigint-maximum-strict",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": 9223372036854775807
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      },
+      {
+        "bounded": {
+          "candidate_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "distinguishing_examples": [
+            {
+              "row_id": 1,
+              "x": -9223372036854775807
+            }
+          ],
+          "distinguishing_rows": 1,
+          "errors": [],
+          "legal_rows": 6,
+          "original_rows": [
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ],
+            [
+              1
+            ]
+          ],
+          "status": "DIFFERENT",
+          "total_rows": 6
+        },
+        "case_id": "bigint-minimum-neighbor",
+        "counterexample_replay": {
+          "candidate": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "rows": [],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "confirmed": true,
+          "diagnostic": null,
+          "original": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "rows": [
+              [
+                1
+              ]
+            ],
+            "schema_holds": true,
+            "status": "OBSERVED"
+          },
+          "row": {
+            "row_id": 1,
+            "x": -9223372036854775807
+          },
+          "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)"
+        },
+        "errors": [],
+        "expected_status": "DIFFERENT",
+        "scope_status": null
+      }
+    ],
+    "summary": {
+      "bounded_cases": 23,
+      "confirmed_independent_replays": 10,
+      "control_cases": 7,
+      "distinguishing_rows": 12,
+      "enumerated_rows": 182,
+      "expected_status_counts": {
+        "DIFFERENT": 10,
+        "EQUIVALENT": 12,
+        "INVALID_CANDIDATE": 5,
+        "INVALID_INPUT": 2,
+        "UNSAT_SCHEMA": 1
+      },
+      "failed_cases": 0,
+      "fixtures": 30,
+      "independent_replays": 10,
+      "legal_rows": 157
+    }
+  },
+  "production": {
+    "diagnostic": "Fixtures-only mode: no production API was called",
+    "metrics": {
+      "confirmed_replay_rate": null,
+      "confirmed_replays": null,
+      "false_different": null,
+      "false_equivalent": null,
+      "inconclusive_checks": null,
+      "row_errors": null,
+      "row_inconclusive": null,
+      "row_mismatches": null,
+      "sat_disagreement_models": null
+    },
+    "missing_interfaces": [],
+    "run_status": "NOT_RUN"
+  },
+  "timeout_ms": 5000
+}
