@@ -12,7 +12,10 @@ def main(argv=None):
     if args and args[0] == "check-verifier":
         from .verifier_check import main as verifier_main
         return verifier_main(args[1:])
+    if args and args[0] == "score":
+        from .scorer import main as score_main
+        return score_main(args[1:])
     parser = argparse.ArgumentParser(description="SQL benchmark and Experiment A evaluation utilities")
-    parser.add_argument("command", choices=("check-samples", "check-verifier"))
+    parser.add_argument("command", choices=("check-samples", "check-verifier", "score"))
     parser.parse_args(args)
     return 0

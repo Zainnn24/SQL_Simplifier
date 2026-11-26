@@ -1,0 +1,284 @@
+{
+  "category_groups": [
+    {
+      "category": "E",
+      "config_id": "evaluation-copy-scripted-v1",
+      "final_simplification": {
+        "denominator": 1,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "first_equivalence": {
+        "denominator": 1,
+        "numerator": 1,
+        "rate": 1.0
+      },
+      "first_simplification": {
+        "denominator": 1,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "missing_runs": 0,
+      "observed_runs": 1,
+      "outcomes": {
+        "attempts": {
+          "EQUIVALENT": 4
+        },
+        "runs": {
+          "BUDGET_EXHAUSTED": 1
+        }
+      },
+      "recovery": {
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      },
+      "reductions": {
+        "accepted_runs": 0,
+        "mean_nodes_removed": null,
+        "mean_percent_reduction": null,
+        "nodes_removed_total": 0
+      },
+      "repeat": 1,
+      "resources": {
+        "calls": 4,
+        "calls_accounting_complete": true,
+        "elapsed_ms": 50,
+        "elapsed_unknown_runs": 0,
+        "input_tokens_known": 0,
+        "input_tokens_unknown_attempts": 0,
+        "output_tokens_known": 0,
+        "output_tokens_unknown_attempts": 0,
+        "token_accounting_complete": true
+      },
+      "run_kind": "scripted",
+      "scheduled_runs": 1,
+      "valid_runs": 1
+    }
+  ],
+  "family_groups": [
+    {
+      "config_id": "evaluation-copy-scripted-v1",
+      "family": "E2",
+      "final_simplification": {
+        "denominator": 1,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "first_equivalence": {
+        "denominator": 1,
+        "numerator": 1,
+        "rate": 1.0
+      },
+      "first_simplification": {
+        "denominator": 1,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "missing_runs": 0,
+      "observed_runs": 1,
+      "outcomes": {
+        "attempts": {
+          "EQUIVALENT": 4
+        },
+        "runs": {
+          "BUDGET_EXHAUSTED": 1
+        }
+      },
+      "recovery": {
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      },
+      "reductions": {
+        "accepted_runs": 0,
+        "mean_nodes_removed": null,
+        "mean_percent_reduction": null,
+        "nodes_removed_total": 0
+      },
+      "repeat": 1,
+      "resources": {
+        "calls": 4,
+        "calls_accounting_complete": true,
+        "elapsed_ms": 50,
+        "elapsed_unknown_runs": 0,
+        "input_tokens_known": 0,
+        "input_tokens_unknown_attempts": 0,
+        "output_tokens_known": 0,
+        "output_tokens_unknown_attempts": 0,
+        "token_accounting_complete": true
+      },
+      "run_kind": "scripted",
+      "scheduled_runs": 1,
+      "valid_runs": 1
+    }
+  ],
+  "format_version": "evaluation-score-v1",
+  "integrity": {
+    "complete": true,
+    "issues": []
+  },
+  "mode": "offline_log_scoring",
+  "plan": {
+    "config_paths": [
+      "evaluation/scoring_examples/EVALUATION_COPY/config.json"
+    ],
+    "expected_tasks_per_repeat": null,
+    "logs": "evaluation/scoring_examples/EVALUATION_COPY/logs",
+    "manifest": "evaluation/scoring_examples/EVALUATION_COPY/manifest.jsonl",
+    "repeats": [
+      1
+    ],
+    "split": "dev"
+  },
+  "planned_repeats": [
+    1
+  ],
+  "repetitions": [
+    {
+      "config_id": "evaluation-copy-scripted-v1",
+      "final_simplification": {
+        "denominator": 1,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "first_equivalence": {
+        "denominator": 1,
+        "numerator": 1,
+        "rate": 1.0
+      },
+      "first_simplification": {
+        "denominator": 1,
+        "numerator": 0,
+        "rate": 0.0
+      },
+      "missing_runs": 0,
+      "observed_runs": 1,
+      "outcomes": {
+        "attempts": {
+          "EQUIVALENT": 4
+        },
+        "runs": {
+          "BUDGET_EXHAUSTED": 1
+        }
+      },
+      "recovery": {
+        "denominator": 0,
+        "numerator": 0,
+        "rate": null
+      },
+      "reductions": {
+        "accepted_runs": 0,
+        "mean_nodes_removed": null,
+        "mean_percent_reduction": null,
+        "nodes_removed_total": 0
+      },
+      "repeat": 1,
+      "resources": {
+        "calls": 4,
+        "calls_accounting_complete": true,
+        "elapsed_ms": 50,
+        "elapsed_unknown_runs": 0,
+        "input_tokens_known": 0,
+        "input_tokens_unknown_attempts": 0,
+        "output_tokens_known": 0,
+        "output_tokens_unknown_attempts": 0,
+        "token_accounting_complete": true
+      },
+      "run_kind": "scripted",
+      "scheduled_runs": 1,
+      "valid_runs": 1
+    }
+  ],
+  "runs": [
+    {
+      "category": "E",
+      "config_id": "evaluation-copy-scripted-v1",
+      "family": "E2",
+      "final_simplification": false,
+      "first_different": false,
+      "first_equivalence": true,
+      "first_simplification": false,
+      "integrity_valid": true,
+      "outcomes": {
+        "EQUIVALENT": 4
+      },
+      "reduction": null,
+      "repeat": 1,
+      "resources": {
+        "calls": 4,
+        "calls_accounting_complete": true,
+        "declared_calls_used": 4,
+        "elapsed_ms": 50,
+        "input_tokens_known": 0,
+        "input_tokens_unknown_attempts": 0,
+        "output_tokens_known": 0,
+        "output_tokens_unknown_attempts": 0,
+        "token_accounting_complete": true
+      },
+      "run_id": "evaluation-copy-r1",
+      "run_kind": "scripted",
+      "sources": [
+        {
+          "attempt_no": 1,
+          "file": "trace.jsonl",
+          "line": 1,
+          "record_type": "attempt"
+        },
+        {
+          "attempt_no": 2,
+          "file": "trace.jsonl",
+          "line": 2,
+          "record_type": "attempt"
+        },
+        {
+          "attempt_no": 3,
+          "file": "trace.jsonl",
+          "line": 3,
+          "record_type": "attempt"
+        },
+        {
+          "attempt_no": 4,
+          "file": "trace.jsonl",
+          "line": 4,
+          "record_type": "attempt"
+        },
+        {
+          "attempt_no": null,
+          "file": "trace.jsonl",
+          "line": 5,
+          "record_type": "run_end"
+        }
+      ],
+      "split": "dev",
+      "task_id": "E2-01",
+      "terminal_counts": {
+        "BUDGET_EXHAUSTED": 1
+      },
+      "terminal_reason": "BUDGET_EXHAUSTED"
+    }
+  ],
+  "sources": {
+    "configs": [
+      {
+        "config_id": "evaluation-copy-scripted-v1",
+        "file": "config.json",
+        "run_kind": "scripted",
+        "sha256": "54198f161b98f4e4a8fc49e726bce101eda8979696b25c5bfd55ff85bc02978f"
+      }
+    ],
+    "logs": [
+      {
+        "file": "trace.jsonl",
+        "sha256": "dc303821f593882d43a08f0b40faa566012ef72f9c5a7276b55ae7f16f253cce"
+      }
+    ],
+    "manifest": [
+      {
+        "file": "manifest.jsonl",
+        "sha256": "5840cfdd083bc460df83b93a04addda293133b510ce00195ef7c085b4888080c"
+      }
+    ]
+  },
+  "split": "dev"
+}
