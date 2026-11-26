@@ -1,0 +1,20 @@
+{
+  "config_id": "e2-scripted-v1",
+  "run_kind": "scripted",
+  "model_id": "scripted-e2",
+  "sampling": {},
+  "prompt_version": "generic-v1",
+  "output_parser": "sql-or-single-fence-v1",
+  "solver_timeout_ms": 5000,
+  "model_timeout_s": 60,
+  "max_model_calls": 4,
+  "transport_policy": "no_automatic_retry",
+  "benchmark_version": "e2-seed-v1",
+  "code_revision": "a9ff6de685e84098f9669bf26330dd02c331ab42+working-tree",
+  "dependency_versions": {
+    "python": "3.12.7",
+    "sqlglot": "unused by scripted verifier",
+    "z3-solver": "unused by scripted verifier",
+    "duckdb": "unused by scripted verifier"
+  }
+}

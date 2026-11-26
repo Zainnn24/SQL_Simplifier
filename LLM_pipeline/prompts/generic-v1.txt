@@ -1,0 +1,12 @@
+Rewrite only the WHERE predicate of the supplied DuckDB query. Return one complete SELECT
+statement with the original table and projection. Preserve row selection for every row
+allowed by the schema. Make the predicate strictly smaller. Count one node per operator,
+column occurrence or literal. A signed integer is one literal. Parentheses add zero.
+Use declared BIGINT NOT NULL columns, in-range integer literals, =, !=, <, <=, >, >=,
+TRUE, FALSE, AND, OR, NOT and parentheses. Return SQL only.
+
+Schema
+{schema_sql}
+
+Original query
+{original_sql}
