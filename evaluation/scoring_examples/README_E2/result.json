@@ -261,19 +261,19 @@
         "config_id": "e2-scripted-v1",
         "file": "config.json",
         "run_kind": "scripted",
-        "sha256": "df6b4b7458f0b16697b400f265f999848c1994494e53ef868e301da3a171e3fe"
+        "sha256": "dde34ba07aa4732db1d5eeeaa05003eb6b221344b097b86b569e71e0cc60518c"
       }
     ],
     "logs": [
       {
         "file": "trace.jsonl",
-        "sha256": "ee9c16462035cdb41abd11c9d86b6b1b016e62d36094065841a142dbe4690bb1"
+        "sha256": "85068b1984f16f6f72adce937f058016fc4bce455bae7662df16050cb0095f06"
       }
     ],
     "manifest": [
       {
         "file": "manifest.jsonl",
-        "sha256": "5840cfdd083bc460df83b93a04addda293133b510ce00195ef7c085b4888080c"
+        "sha256": "04cc4a702b960954d6aef4274973006fb1fe6b4ced01d2376d78b8524a55f6eb"
       }
     ]
   },

@@ -6,7 +6,7 @@
     "z3-solver": "5.4.1.0"
   },
   "exit_code": 2,
-  "fixture_sha256": "87452ff3baac9d3a83243cc0632a1ccdf1d1a6ab42aaed0493f9c6fcd3234613",
+  "fixture_sha256": "bef6c3b9864816d3f97ca901fa4c9b88a3bb1069ce22744068b394a3fc541514",
   "fixtures_file": "evaluation/verifier_cases.jsonl",
   "mode": "production",
   "production": {

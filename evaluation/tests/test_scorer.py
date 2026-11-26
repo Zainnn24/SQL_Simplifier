@@ -28,7 +28,8 @@ def write_jsonl(path, records):
 
 
 def readme_trace_bytes():
-    source = (ROOT / "README.md").read_bytes()
+    # README follows the user's Git checkout policy; reproduction inputs use LF.
+    source = (ROOT / "README.md").read_bytes().replace(b"\r\n", b"\n")
     section = source.index(b"#### E2 scripted JSONL trace")
     start = source.index(b"```jsonl", section) + len(b"```jsonl")
     start = source.index(b"\n", start) + 1

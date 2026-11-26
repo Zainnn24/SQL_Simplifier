@@ -264,19 +264,19 @@
         "config_id": "evaluation-copy-scripted-v1",
         "file": "config.json",
         "run_kind": "scripted",
-        "sha256": "54198f161b98f4e4a8fc49e726bce101eda8979696b25c5bfd55ff85bc02978f"
+        "sha256": "d1b9d8271f5a271324a21054f4034ae9279d4192552990b5281a0429fc90557f"
       }
     ],
     "logs": [
       {
         "file": "trace.jsonl",
-        "sha256": "dc303821f593882d43a08f0b40faa566012ef72f9c5a7276b55ae7f16f253cce"
+        "sha256": "44a6970157ad2393a6a4f7cbd436af98224a17c70c3a798aec6c147ef4fd9917"
       }
     ],
     "manifest": [
       {
         "file": "manifest.jsonl",
-        "sha256": "5840cfdd083bc460df83b93a04addda293133b510ce00195ef7c085b4888080c"
+        "sha256": "04cc4a702b960954d6aef4274973006fb1fe6b4ced01d2376d78b8524a55f6eb"
       }
     ]
   },

@@ -234,8 +234,10 @@ def _run(run_id, entries, task, config, issues):
     for attempt, source, attempt_valid in attempts:
         if attempt_valid and attempt["outcome"] == "CHECKED" and attempt["candidate_sql"] == task.get("original_sql"):
             check = attempt["check_result"]
+            if check["status"] == "DIFFERENT":
+                issues.add("COPY_VERDICT_CONTRADICTION", "Byte-identical original and candidate SQL cannot have a DIFFERENT verdict", record=attempt, source=source, attempt_no=attempt["attempt_no"])
             if check["original_nodes"] is not None and check["candidate_nodes"] is not None and check["candidate_nodes"] != check["original_nodes"]:
-                issues.add("COPY_NODE_MISMATCH", "A byte-identical copied original must retain its node count", record=attempt, source=source)
+                issues.add("COPY_NODE_MISMATCH", "A byte-identical copied original must retain its node count", record=attempt, source=source, attempt_no=attempt["attempt_no"])
     if end_valid:
         record, source, _ = ends[0]
 
@@ -296,7 +298,7 @@ def _run(run_id, entries, task, config, issues):
     first_entries = numbered.get(1, [])
     first = first_entries[0][0] if len(first_entries) == 1 and first_entries[0][2] else None
     first_usable = first is not None and all(same_identity(record) for record, _, _ in entries) and bool(task) and bool(config)
-    bad_identity = {"UNKNOWN_TASK", "INVALID_MANIFEST_RUN", "UNKNOWN_CONFIG", "INVALID_CONFIG_RUN", "RUN_KIND_MISMATCH", "TASK_SPLIT_MISMATCH", "UNSCHEDULED_SLOT", "SLOT_COLLISION", "RUN_IDENTITY_CONFLICT", "SOURCE_NODE_MISMATCH", "COPY_NODE_MISMATCH", "PREFLIGHT_POLICY"}
+    bad_identity = {"UNKNOWN_TASK", "INVALID_MANIFEST_RUN", "UNKNOWN_CONFIG", "INVALID_CONFIG_RUN", "RUN_KIND_MISMATCH", "TASK_SPLIT_MISMATCH", "UNSCHEDULED_SLOT", "SLOT_COLLISION", "RUN_IDENTITY_CONFLICT", "SOURCE_NODE_MISMATCH", "COPY_NODE_MISMATCH", "COPY_VERDICT_CONTRADICTION", "PREFLIGHT_POLICY"}
     first_usable = first_usable and not any(item.get("run_id") == run_id and item["code"] in bad_identity for item in issues.items)
     first_check = first["check_result"] if first_usable and first["outcome"] == "CHECKED" else None
     accepted = bool(valid and end_valid and end["terminal_reason"] == "ACCEPTED")
@@ -412,7 +414,7 @@ def score_logs(manifest: Path, logs: Path, *, config_paths: list[Path], split: s
         issues.add("EMPTY_SPLIT", "Manifest has no tasks for the selected split")
     if expected_tasks_per_repeat is not None and (not _integer(expected_tasks_per_repeat, 1) or len(selected) != expected_tasks_per_repeat):
         issues.add("TASK_COUNT_MISMATCH", f"Selected manifest has {len(selected)} tasks; expected {expected_tasks_per_repeat}")
-    scheduled = {(config_id, repeat, task_id) for config_id in configs for repeat in planned_repeats for task_id in selected}
+    scheduled = {(config_id, repeat, task_id, split) for config_id in configs for repeat in planned_repeats for task_id in selected}
     files = sorted(logs.rglob("*.jsonl")) if logs.is_dir() else [logs]
     if not files:
         issues.add("NO_LOG_FILES", "No JSONL log files were found")
@@ -446,34 +448,34 @@ def score_logs(manifest: Path, logs: Path, *, config_paths: list[Path], split: s
                 issues.add("INVALID_CONFIG_RUN", "Run references a config that failed validation", record=record, source=source)
             if "run_kind" in record and record["config_id"] in configs and record["run_kind"] != configs[record["config_id"]]["run_kind"]:
                 issues.add("RUN_KIND_MISMATCH", "Log run_kind differs from its immutable config", record=record, source=source)
-            slot = (record["config_id"], record["repeat"], record["task_id"])
-            if slot not in scheduled or record["split"] != split:
+            slot = (record["config_id"], record["repeat"], record["task_id"], record["split"])
+            if slot not in scheduled:
                 issues.add("UNSCHEDULED_SLOT", "Log identity is outside the manifest/config/repeat schedule", record=record, source=source)
             entries[record["run_id"]].append((record, source, valid))
     slot_runs = defaultdict(set)
     for run_id, values in entries.items():
         for record, _, _ in values:
-            slot_runs[(record["config_id"], record["repeat"], record["task_id"])].add(run_id)
+            slot_runs[(record["config_id"], record["repeat"], record["task_id"], record["split"])].add(run_id)
     for slot, run_ids in sorted(slot_runs.items()):
         if len(run_ids) > 1:
             for run_id in sorted(run_ids):
-                issues.add("SLOT_COLLISION", "More than one run_id occupies this scheduled task/config/repeat slot", run_id=run_id, task_id=slot[2], config_id=slot[0], repeat=slot[1], source=entries[run_id][0][1])
-    for config_id, repeat, task_id in sorted(scheduled):
-        if (config_id, repeat, task_id) not in slot_runs:
-            issues.add("MISSING_SLOT", "Scheduled run has no log records", task_id=task_id, config_id=config_id, repeat=repeat)
+                issues.add("SLOT_COLLISION", "More than one run_id occupies this scheduled task/config/repeat/split slot", run_id=run_id, task_id=slot[2], config_id=slot[0], repeat=slot[1], split=slot[3], source=entries[run_id][0][1])
+    for config_id, repeat, task_id, planned_split in sorted(scheduled):
+        if (config_id, repeat, task_id, planned_split) not in slot_runs:
+            issues.add("MISSING_SLOT", "Scheduled run has no log records", task_id=task_id, config_id=config_id, repeat=repeat, split=planned_split)
     runs = [_run(run_id, values, tasks.get(values[0][0]["task_id"], {}), configs.get(values[0][0]["config_id"], {}), issues) for run_id, values in sorted(entries.items())]
     repetitions, family_groups, category_groups = [], [], []
     for config_id, config in sorted(configs.items()):
         for repeat in planned_repeats:
             group_runs = [run for run in runs if run["config_id"] == config_id and run["repeat"] == repeat and run["task_id"] in selected and run["split"] == split]
-            missing = sum((config_id, repeat, task_id) not in slot_runs for task_id in selected)
+            missing = sum((config_id, repeat, task_id, split) not in slot_runs for task_id in selected)
             repetitions.append(_aggregate(config_id, config, repeat, selected, group_runs, missing))
             for key, destination in (("family", family_groups), ("category", category_groups)):
                 labels = sorted({task["family"] if key == "family" else task["family"][:1] for task in selected.values()})
                 for label in labels:
                     subset = {task_id: task for task_id, task in selected.items() if (task["family"] if key == "family" else task["family"][:1]) == label}
                     subset_runs = [run for run in group_runs if run["task_id"] in subset]
-                    missing_subset = sum((config_id, repeat, task_id) not in slot_runs for task_id in subset)
+                    missing_subset = sum((config_id, repeat, task_id, split) not in slot_runs for task_id in subset)
                     destination.append({key: label, **_aggregate(config_id, config, repeat, subset, subset_runs, missing_subset)})
     return {"format_version": "evaluation-score-v1", "mode": "offline_log_scoring", "split": split, "planned_repeats": planned_repeats,
             "plan": {"manifest": manifest.as_posix(), "logs": logs.as_posix(), "config_paths": [Path(path).as_posix() for path in config_paths],
@@ -521,7 +523,7 @@ def main(argv=None) -> int:
     for path, text in ((args.output, json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n"), (args.summary, summary)):
         if path is not None:
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(text, encoding="utf-8")
+            path.write_text(text, encoding="utf-8", newline="\n")
     return 0 if report["integrity"]["complete"] else 1
 
 
