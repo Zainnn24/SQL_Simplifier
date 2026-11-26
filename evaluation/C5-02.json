@@ -1,0 +1,67 @@
+{
+  "task_id": "C5-02",
+  "family": "C5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE double_gap (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM double_gap WHERE ((x >= 0 AND x <= 3) OR (x >= 8 AND x <= 10)) AND x != 5 AND x != 6",
+  "reference_sql": "SELECT row_id FROM double_gap WHERE (x >= 0 AND x <= 3) OR (x >= 8 AND x <= 10)",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "x": -1
+    },
+    {
+      "row_id": 2,
+      "x": 0
+    },
+    {
+      "row_id": 3,
+      "x": 3
+    },
+    {
+      "row_id": 4,
+      "x": 4
+    },
+    {
+      "row_id": 5,
+      "x": 5
+    },
+    {
+      "row_id": 6,
+      "x": 6
+    },
+    {
+      "row_id": 7,
+      "x": 7
+    },
+    {
+      "row_id": 8,
+      "x": 8
+    },
+    {
+      "row_id": 9,
+      "x": 10
+    },
+    {
+      "row_id": 10,
+      "x": 11
+    }
+  ],
+  "expected_rows": [
+    [
+      2
+    ],
+    [
+      3
+    ],
+    [
+      8
+    ],
+    [
+      9
+    ]
+  ],
+  "derivation": "The finite intervals [0, 3] and [8, 10] exclude every value from 4 through 7. Both 5 and 6 therefore fail the union already, so both explicit exclusions can be removed while retaining both interval boundaries.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, C5 seed (C5-01): remove two exclusions inside one gap between finite live intervals.",
+  "error_exposed": "Replacing the union with x >= 0 AND x <= 10 fills its gap and incorrectly includes rows 4, 5, 6 and 7 (x = 4, 5, 6 and 7). Keeping only the first interval loses rows 8 and 9 from the other live interval."
+}

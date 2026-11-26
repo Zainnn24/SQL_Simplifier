@@ -1,0 +1,20 @@
+{
+  "task_id": "B4-04",
+  "family": "B4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE endpoint_branches (row_id BIGINT NOT NULL, x BIGINT NOT NULL, y BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM endpoint_branches WHERE (x >= 0 AND x != 0) OR y = 7",
+  "reference_sql": "SELECT row_id FROM endpoint_branches WHERE x > 0 OR y = 7",
+  "sample_rows": [
+    {"row_id": 1, "x": -1, "y": 6},
+    {"row_id": 2, "x": 0, "y": 6},
+    {"row_id": 3, "x": 1, "y": 6},
+    {"row_id": 4, "x": -1, "y": 7},
+    {"row_id": 5, "x": 0, "y": 7},
+    {"row_id": 6, "x": 1, "y": 7}
+  ],
+  "expected_rows": [[3], [4], [5], [6]],
+  "derivation": "For every legal row, x >= 0 AND x != 0 is equivalent to x > 0. Replacing only that OR branch leaves the independent y = 7 branch unchanged, so rows with y = 7 still qualify even when x is zero or negative.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B4 (B4-01), retaining an independent live OR branch on a second column.",
+  "error_exposed": "Returning only x > 0 drops the live y = 7 branch and loses rows 4 and 5 (x = -1 and 0 with y = 7)."
+}

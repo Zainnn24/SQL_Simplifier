@@ -1,0 +1,20 @@
+# Byte-hashed reproduction inputs and generated reports use LF on every platform.
+/evaluation/verifier_cases.jsonl text eol=lf
+/evaluation/scoring_examples/README_E2/manifest.jsonl text eol=lf
+/evaluation/scoring_examples/README_E2/config.json text eol=lf
+/evaluation/scoring_examples/README_E2/logs/trace.jsonl text eol=lf
+/evaluation/scoring_examples/EVALUATION_COPY/manifest.jsonl text eol=lf
+/evaluation/scoring_examples/EVALUATION_COPY/config.json text eol=lf
+/evaluation/scoring_examples/EVALUATION_COPY/logs/trace.jsonl text eol=lf
+/evaluation/scoring_examples/README_E2/result.json text eol=lf
+/evaluation/scoring_examples/README_E2/summary.txt text eol=lf
+/evaluation/scoring_examples/EVALUATION_COPY/result.json text eol=lf
+/evaluation/scoring_examples/EVALUATION_COPY/summary.txt text eol=lf
+/evaluation/results/experiment_a_offline.json text eol=lf
+/evaluation/results/experiment_a_production.json text eol=lf
+# D1 intake inputs and its saved reports follow the same byte-hash convention.
+/evaluation/manifests/martin_draft.jsonl text eol=lf
+/evaluation/benchmark_reviews.jsonl text eol=lf
+/data/SQL_Predicate_Family_Examples.sql text eol=lf
+/evaluation/results/benchmark_draft.json text eol=lf
+/evaluation/results/benchmark_formal.json text eol=lf

@@ -1,0 +1,20 @@
+{
+  "task_id": "B5-04",
+  "family": "B5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE bounded_controls (row_id BIGINT NOT NULL, x BIGINT NOT NULL, y BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM bounded_controls WHERE x <= 9223372036854775807 AND y >= 10",
+  "reference_sql": "SELECT row_id FROM bounded_controls WHERE y >= 10",
+  "sample_rows": [
+    {"row_id": 1, "x": -9223372036854775808, "y": 9},
+    {"row_id": 2, "x": -9223372036854775808, "y": 10},
+    {"row_id": 3, "x": 0, "y": 11},
+    {"row_id": 4, "x": 9223372036854775807, "y": 9},
+    {"row_id": 5, "x": 9223372036854775807, "y": 10},
+    {"row_id": 6, "x": 9223372036854775806, "y": 10}
+  ],
+  "expected_rows": [[2], [3], [5], [6]],
+  "derivation": "The signed BIGINT type makes x <= 9223372036854775807 true on every legal row. Its conjunction with y >= 10 is therefore equivalent to y >= 10. The independent restriction on y remains necessary regardless of whether x is at its minimum, maximum or an interior value.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B5 (B5-01), conjoining the guaranteed type bound with an independent restriction on a second column.",
+  "error_exposed": "Keeping only x <= 9223372036854775807 drops y >= 10 and incorrectly includes rows 1 and 4 (y = 9 at the minimum and maximum x values)."
+}

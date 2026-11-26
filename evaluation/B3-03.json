@@ -1,0 +1,22 @@
+{
+  "task_id": "B3-03",
+  "family": "B3",
+  "split": "dev",
+  "schema_sql": "CREATE TABLE pinned_ranges (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM pinned_ranges WHERE (x >= -4 AND x <= -4) OR (x >= 2 AND x <= 5)",
+  "reference_sql": "SELECT row_id FROM pinned_ranges WHERE x = -4 OR (x >= 2 AND x <= 5)",
+  "sample_rows": [
+    {"row_id": 1, "x": -5},
+    {"row_id": 2, "x": -4},
+    {"row_id": 3, "x": -3},
+    {"row_id": 4, "x": 1},
+    {"row_id": 5, "x": 2},
+    {"row_id": 6, "x": 3},
+    {"row_id": 7, "x": 5},
+    {"row_id": 8, "x": 6}
+  ],
+  "expected_rows": [[2], [5], [6], [7]],
+  "derivation": "The two inclusive bounds in the first OR branch pin x to -4, so that branch is equivalent to x = -4. Replacing only that branch preserves the separate inclusive interval from 2 through 5.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B3 (B3-01), with a separate live interval.",
+  "error_exposed": "Keeping only x >= 2 AND x <= 5 loses row 2 (x = -4). Keeping only x = -4 loses rows 5, 6 and 7 (x = 2, 3 and 5)."
+}

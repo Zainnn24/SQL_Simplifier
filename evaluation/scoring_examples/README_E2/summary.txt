@@ -1,0 +1,4 @@
+Log integrity: COMPLETE; issues=0.
+Scripted groups are development evidence, separate from measured model groups.
+scripted e2-scripted-v1 repeat=1: scheduled=1; first-equivalent=0/1 (0.000); first-smaller=0/1 (0.000); final-smaller=1/1 (1.000); recovery=1/1 (1.000).
+  accepted=1; nodes-removed=4; accepted-mean-percent-reduction=57.14%; calls=2; elapsed_ms=70; known-input-tokens=0; known-output-tokens=0; token-accounting-complete=true.

@@ -1,0 +1,25 @@
+{
+  "task_id": "C1-04",
+  "family": "C1",
+  "split": "dev",
+  "schema_sql": "CREATE TABLE guarded_ranges (row_id BIGINT NOT NULL, reading BIGINT NOT NULL, enabled BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM guarded_ranges WHERE (enabled = 1 AND ((reading >= 10 AND reading <= 15) OR (reading >= 14 AND reading <= 20))) OR reading >= 40",
+  "reference_sql": "SELECT row_id FROM guarded_ranges WHERE (enabled = 1 AND reading >= 10 AND reading <= 20) OR reading >= 40",
+  "sample_rows": [
+    {"row_id": 1, "reading": 9, "enabled": 1},
+    {"row_id": 2, "reading": 10, "enabled": 1},
+    {"row_id": 3, "reading": 14, "enabled": 1},
+    {"row_id": 4, "reading": 14, "enabled": 0},
+    {"row_id": 5, "reading": 15, "enabled": 1},
+    {"row_id": 6, "reading": 20, "enabled": 1},
+    {"row_id": 7, "reading": 21, "enabled": 1},
+    {"row_id": 8, "reading": 39, "enabled": 1},
+    {"row_id": 9, "reading": 40, "enabled": 0},
+    {"row_id": 10, "reading": 40, "enabled": 1},
+    {"row_id": 11, "reading": 10, "enabled": 0}
+  ],
+  "expected_rows": [[2], [3], [5], [6], [9], [10]],
+  "derivation": "Inside the enabled = 1 branch, the inclusive intervals [10, 15] and [14, 20] overlap and combine into [10, 20]. The same enabled guard must still restrict that merged interval. The separate reading >= 40 branch is independent of enabled and must remain available for every enabled value.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C1 seed (C1-01): merge intervals within a branch guarded by a second column while retaining an independent tail branch.",
+  "error_exposed": "Returning WHERE (reading >= 10 AND reading <= 20) OR reading >= 40 drops the enabled = 1 guard and incorrectly includes row 4 (reading = 14, enabled = 0) and row 11 (reading = 10, enabled = 0). Dropping the independent reading >= 40 branch loses rows 9 and 10. Applying enabled = 1 to that tail as well incorrectly loses row 9 (reading = 40, enabled = 0). Rows 1, 7, and 8 retain the exclusions below, just above, and between the accepted intervals."
+}

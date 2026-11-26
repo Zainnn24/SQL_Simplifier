@@ -1,0 +1,60 @@
+{
+  "task_id": "C4-02",
+  "family": "C4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE upper_cut (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM upper_cut WHERE ((x >= -5 AND x <= -1) OR x >= 4) AND x <= 2",
+  "reference_sql": "SELECT row_id FROM upper_cut WHERE x >= -5 AND x <= -1",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "x": -6
+    },
+    {
+      "row_id": 2,
+      "x": -5
+    },
+    {
+      "row_id": 3,
+      "x": -3
+    },
+    {
+      "row_id": 4,
+      "x": -1
+    },
+    {
+      "row_id": 5,
+      "x": 0
+    },
+    {
+      "row_id": 6,
+      "x": 2
+    },
+    {
+      "row_id": 7,
+      "x": 3
+    },
+    {
+      "row_id": 8,
+      "x": 4
+    },
+    {
+      "row_id": 9,
+      "x": 5
+    }
+  ],
+  "expected_rows": [
+    [
+      2
+    ],
+    [
+      3
+    ],
+    [
+      4
+    ]
+  ],
+  "derivation": "The outer upper bound x <= 2 makes the x >= 4 branch impossible. Every value in the bounded left interval [-5, -1] already satisfies that upper bound, so the complete bounded interval remains unchanged, including both endpoints.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, C4 seed (C4-01): use an outer upper bound to remove the right branch while preserving a finite left interval.",
+  "error_exposed": "Returning the uncut union (x >= -5 AND x <= -1) OR x >= 4 ignores the outer upper bound and incorrectly includes rows 8 and 9 (x = 4 and 5). Returning only x <= -1 after removing the right branch drops the retained lower endpoint requirement and incorrectly includes row 1 (x = -6)."
+}

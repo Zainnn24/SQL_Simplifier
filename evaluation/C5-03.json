@@ -1,0 +1,99 @@
+{
+  "task_id": "C5-03",
+  "family": "C5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE excluded_branches (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM excluded_branches WHERE (((x >= -4 AND x <= 0) AND x != -2) OR ((x >= 6 AND x <= 10) AND x != 8)) AND x != 3",
+  "reference_sql": "SELECT row_id FROM excluded_branches WHERE ((x >= -4 AND x <= 0) AND x != -2) OR ((x >= 6 AND x <= 10) AND x != 8)",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "x": -5
+    },
+    {
+      "row_id": 2,
+      "x": -4
+    },
+    {
+      "row_id": 3,
+      "x": -3
+    },
+    {
+      "row_id": 4,
+      "x": -2
+    },
+    {
+      "row_id": 5,
+      "x": -1
+    },
+    {
+      "row_id": 6,
+      "x": 0
+    },
+    {
+      "row_id": 7,
+      "x": 1
+    },
+    {
+      "row_id": 8,
+      "x": 3
+    },
+    {
+      "row_id": 9,
+      "x": 5
+    },
+    {
+      "row_id": 10,
+      "x": 6
+    },
+    {
+      "row_id": 11,
+      "x": 7
+    },
+    {
+      "row_id": 12,
+      "x": 8
+    },
+    {
+      "row_id": 13,
+      "x": 9
+    },
+    {
+      "row_id": 14,
+      "x": 10
+    },
+    {
+      "row_id": 15,
+      "x": 11
+    }
+  ],
+  "expected_rows": [
+    [
+      2
+    ],
+    [
+      3
+    ],
+    [
+      5
+    ],
+    [
+      6
+    ],
+    [
+      10
+    ],
+    [
+      11
+    ],
+    [
+      13
+    ],
+    [
+      14
+    ]
+  ],
+  "derivation": "The first branch is contained in [-4, 0] and the second in [6, 10], so neither can admit 3 in the intervening gap. Only the outer x != 3 condition is redundant. The branch-local exclusions at -2 and 8 each remove a value from a live interval and must both remain.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, C5 seed (C5-01): retain two distinct branch-local meaningful exclusions while deleting an outer gap exclusion.",
+  "error_exposed": "Dropping the first branch-local x != -2 while preserving the other exclusion incorrectly includes row 4 (x = -2). Dropping the second branch-local x != 8 instead incorrectly includes row 12 (x = 8). The gap witness row 8 (x = 3) remains excluded after removing only the redundant outer condition."
+}

@@ -1,0 +1,17 @@
+{
+  "task_id": "C3-02",
+  "family": "C3",
+  "split": "test",
+  "schema_sql": "CREATE TABLE isolated_gap (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM isolated_gap WHERE NOT (x < 4 OR x > 4)",
+  "reference_sql": "SELECT row_id FROM isolated_gap WHERE x = 4",
+  "sample_rows": [
+    {"row_id": 1, "x": 3},
+    {"row_id": 2, "x": 4},
+    {"row_id": 3, "x": 5}
+  ],
+  "expected_rows": [[2]],
+  "derivation": "The inner union selects all integers except 4. Negating that union reverses the one-point gap into the only selected point, so the complete predicate is equivalent to x = 4.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C3 seed (C3-01): negate the two-range union to select its single missing point. The reference is a team derivation.",
+  "error_exposed": "Returning WHERE x != 4 forgets the outer NOT: it incorrectly misses row 2 (x = 4) and includes row 1 (x = 3) and row 3 (x = 5). The samples cover the missing point and its immediate neighbors on both sides."
+}

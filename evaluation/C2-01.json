@@ -1,0 +1,19 @@
+{
+  "task_id": "C2-01",
+  "family": "C2",
+  "split": "test",
+  "schema_sql": "CREATE TABLE jobs (row_id BIGINT NOT NULL, stage BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM jobs WHERE stage = 4 OR stage = 5 OR stage = 6",
+  "reference_sql": "SELECT row_id FROM jobs WHERE stage >= 4 AND stage <= 6",
+  "sample_rows": [
+    {"row_id": 1, "stage": 3},
+    {"row_id": 2, "stage": 4},
+    {"row_id": 3, "stage": 5},
+    {"row_id": 4, "stage": 6},
+    {"row_id": 5, "stage": 7}
+  ],
+  "expected_rows": [[2], [3], [4]],
+  "derivation": "The only integer values in the inclusive interval [4, 6] are 4, 5, and 6. Listing those three consecutive stages and testing the two inclusive bounds therefore select exactly the same legal rows.",
+  "source": "data/SQL_Predicate_Family_Examples.sql, C2 seed. Rule instance of adjacency in a discrete integer domain; PostgreSQL 17, sections 8.17.3 and 8.17.7 on endpoints and discrete ranges, https://www.postgresql.org/docs/17/rangetypes.html",
+  "error_exposed": "Using strict bounds stage > 4 AND stage < 6 loses row 2 (stage = 4) and row 4 (stage = 6). Rows 1 (stage = 3) and 5 (stage = 7) check the adjacent excluded values."
+}

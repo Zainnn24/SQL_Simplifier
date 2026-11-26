@@ -1,0 +1,19 @@
+{
+  "task_id": "C2-04",
+  "family": "C2",
+  "split": "test",
+  "schema_sql": "CREATE TABLE excluded_stages (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM excluded_stages WHERE NOT (x = -2 OR x = -1 OR x = 0)",
+  "reference_sql": "SELECT row_id FROM excluded_stages WHERE NOT (x >= -2 AND x <= 0)",
+  "sample_rows": [
+    {"row_id": 1, "x": -3},
+    {"row_id": 2, "x": -2},
+    {"row_id": 3, "x": -1},
+    {"row_id": 4, "x": 0},
+    {"row_id": 5, "x": 1}
+  ],
+  "expected_rows": [[1], [5]],
+  "derivation": "The three listed points are exactly the integers in the inclusive interval [-2, 0]. Negating either representation selects precisely the integers outside that interval. In particular, both listed endpoints are excluded, while their immediately adjacent outside values are selected.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C2 seed (C2-01): simplify a consecutive run beneath NOT while preserving its inclusive endpoints.",
+  "error_exposed": "Returning WHERE NOT (x > -2 AND x < 0) uses strict inner bounds and incorrectly includes row 2 (x = -2) and row 4 (x = 0). Rows 1 (x = -3) and 5 (x = 1) check that the complement retains both sides of the excluded run."
+}

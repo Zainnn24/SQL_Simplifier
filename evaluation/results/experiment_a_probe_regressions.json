@@ -1,0 +1,418 @@
+{
+  "evidence_kind": "TEST_DOUBLE_REGRESSION_NOT_PRODUCTION",
+  "model_calls": 0,
+  "scenarios": [
+    {
+      "discrepancies": [
+        {
+          "actual": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "schema_holds": true,
+            "status": "EVALUATED"
+          },
+          "case_id": "type-bound-row_id-below_minimum",
+          "expected": {
+            "diagnostic": "Conversion Error: Type INT128 with value -9223372036854775809 can't be cast because the value is out of range for the destination type INT64\n\nLINE 1: INSERT INTO \"t\" (\"row_id\", \"x\") VALUES (?, ?)\n                                                ^",
+            "predicate_truth": null,
+            "rows": null,
+            "schema_holds": false,
+            "status": "REJECTED_TYPE"
+          },
+          "inputs": {
+            "column": "row_id",
+            "query_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "row": {
+              "row_id": -9223372036854775809,
+              "x": 0
+            },
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000,
+            "value": -9223372036854775809
+          },
+          "stage": "type_bound_probe"
+        },
+        {
+          "actual": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "schema_holds": true,
+            "status": "EVALUATED"
+          },
+          "case_id": "type-bound-row_id-above_maximum",
+          "expected": {
+            "diagnostic": "Conversion Error: Type UINT64 with value 9223372036854775808 can't be cast because the value is out of range for the destination type INT64\n\nLINE 1: INSERT INTO \"t\" (\"row_id\", \"x\") VALUES (?, ?)\n                                                ^",
+            "predicate_truth": null,
+            "rows": null,
+            "schema_holds": false,
+            "status": "REJECTED_TYPE"
+          },
+          "inputs": {
+            "column": "row_id",
+            "query_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "row": {
+              "row_id": 9223372036854775808,
+              "x": 0
+            },
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000,
+            "value": 9223372036854775808
+          },
+          "stage": "type_bound_probe"
+        }
+      ],
+      "formal_entry_exit_code": 1,
+      "metrics": {
+        "bounded_checks": 1,
+        "calibration_cases": 3,
+        "calibration_checks": 3,
+        "calibration_confirmed_replay_rate": 1.0,
+        "calibration_confirmed_replays": 1,
+        "calibration_errors": 0,
+        "calibration_node_mismatches": 0,
+        "calibration_sat_disagreement_models": 1,
+        "calibration_validation_checks": 3,
+        "confirmed_replay_rate": 1.0,
+        "confirmed_replays": 2,
+        "false_different": 0,
+        "false_equivalent": 0,
+        "full_checks": 1,
+        "inconclusive_checks": 0,
+        "infrastructure_errors": 0,
+        "node_count_mismatches": 0,
+        "replay_errors": 0,
+        "row_checks": 6,
+        "row_errors": 0,
+        "row_inconclusive": 0,
+        "row_mismatches": 0,
+        "sat_disagreement_models": 2,
+        "type_bound_errors": 0,
+        "type_bound_inconclusive": 0,
+        "type_bound_mismatches": 2,
+        "type_bound_probes": 8,
+        "validation_inconclusive": 0,
+        "validation_mismatches": 0,
+        "verdict_counts_by_stage": {
+          "bounded": {
+            "DIFFERENT": 1
+          },
+          "full_range": {
+            "DIFFERENT": 1
+          }
+        },
+        "verdict_mismatches": 0,
+        "wrong_directions_by_stage": {
+          "bounded": {
+            "false_different": 0,
+            "false_equivalent": 0
+          },
+          "full_range": {
+            "false_different": 0,
+            "false_equivalent": 0
+          }
+        }
+      },
+      "scenario": "omit-row-id-bounds"
+    },
+    {
+      "discrepancies": [
+        {
+          "actual": {
+            "diagnostic": null,
+            "predicate_truth": false,
+            "schema_holds": true,
+            "status": "EVALUATED"
+          },
+          "case_id": "type-bound-x-below_minimum",
+          "expected": {
+            "diagnostic": "Conversion Error: Type INT128 with value -9223372036854775809 can't be cast because the value is out of range for the destination type INT64\n\nLINE 1: INSERT INTO \"t\" (\"row_id\", \"x\") VALUES (?, ?)\n                                                   ^",
+            "predicate_truth": null,
+            "rows": null,
+            "schema_holds": false,
+            "status": "REJECTED_TYPE"
+          },
+          "inputs": {
+            "column": "x",
+            "query_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "row": {
+              "row_id": 0,
+              "x": -9223372036854775809
+            },
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000,
+            "value": -9223372036854775809
+          },
+          "stage": "type_bound_probe"
+        },
+        {
+          "actual": {
+            "diagnostic": null,
+            "predicate_truth": true,
+            "schema_holds": true,
+            "status": "EVALUATED"
+          },
+          "case_id": "type-bound-x-above_maximum",
+          "expected": {
+            "diagnostic": "Conversion Error: Type UINT64 with value 9223372036854775808 can't be cast because the value is out of range for the destination type INT64\n\nLINE 1: INSERT INTO \"t\" (\"row_id\", \"x\") VALUES (?, ?)\n                                                   ^",
+            "predicate_truth": null,
+            "rows": null,
+            "schema_holds": false,
+            "status": "REJECTED_TYPE"
+          },
+          "inputs": {
+            "column": "x",
+            "query_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "row": {
+              "row_id": 0,
+              "x": 9223372036854775808
+            },
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000,
+            "value": 9223372036854775808
+          },
+          "stage": "type_bound_probe"
+        }
+      ],
+      "formal_entry_exit_code": 1,
+      "metrics": {
+        "bounded_checks": 1,
+        "calibration_cases": 3,
+        "calibration_checks": 3,
+        "calibration_confirmed_replay_rate": 1.0,
+        "calibration_confirmed_replays": 1,
+        "calibration_errors": 0,
+        "calibration_node_mismatches": 0,
+        "calibration_sat_disagreement_models": 1,
+        "calibration_validation_checks": 3,
+        "confirmed_replay_rate": 1.0,
+        "confirmed_replays": 2,
+        "false_different": 0,
+        "false_equivalent": 0,
+        "full_checks": 1,
+        "inconclusive_checks": 0,
+        "infrastructure_errors": 0,
+        "node_count_mismatches": 0,
+        "replay_errors": 0,
+        "row_checks": 6,
+        "row_errors": 0,
+        "row_inconclusive": 0,
+        "row_mismatches": 0,
+        "sat_disagreement_models": 2,
+        "type_bound_errors": 0,
+        "type_bound_inconclusive": 0,
+        "type_bound_mismatches": 2,
+        "type_bound_probes": 8,
+        "validation_inconclusive": 0,
+        "validation_mismatches": 0,
+        "verdict_counts_by_stage": {
+          "bounded": {
+            "DIFFERENT": 1
+          },
+          "full_range": {
+            "DIFFERENT": 1
+          }
+        },
+        "verdict_mismatches": 0,
+        "wrong_directions_by_stage": {
+          "bounded": {
+            "false_different": 0,
+            "false_equivalent": 0
+          },
+          "full_range": {
+            "false_different": 0,
+            "false_equivalent": 0
+          }
+        }
+      },
+      "scenario": "omit-x-bounds"
+    },
+    {
+      "discrepancies": [
+        {
+          "actual": {
+            "original_nodes": 4
+          },
+          "case_id": "test-bound-probe-driver",
+          "expected": {
+            "original_nodes": 3
+          },
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM t WHERE x > 0",
+            "original_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000,
+            "validation_original_nodes": 3
+          },
+          "stage": "full_range_node_count"
+        },
+        {
+          "actual": {
+            "original_nodes": 4
+          },
+          "case_id": "test-bound-probe-driver",
+          "expected": {
+            "original_nodes": 3
+          },
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM t WHERE x > 0",
+            "original_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL, CHECK (\"row_id\" = 1), CHECK (\"x\" = -1 OR \"x\" = 0 OR \"x\" = 1))",
+            "timeout_ms": 5000,
+            "validation_original_nodes": 3
+          },
+          "stage": "bounded_node_count"
+        },
+        {
+          "actual": 4,
+          "case_id": "calibration-boundary-3-3",
+          "expected": 3,
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM t WHERE x > 0",
+            "field": "verify.original_nodes",
+            "original_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000
+          },
+          "stage": "calibration_node_count"
+        }
+      ],
+      "formal_entry_exit_code": 1,
+      "metrics": {
+        "bounded_checks": 1,
+        "calibration_cases": 3,
+        "calibration_checks": 3,
+        "calibration_confirmed_replay_rate": 1.0,
+        "calibration_confirmed_replays": 1,
+        "calibration_errors": 0,
+        "calibration_node_mismatches": 1,
+        "calibration_sat_disagreement_models": 1,
+        "calibration_validation_checks": 3,
+        "confirmed_replay_rate": 1.0,
+        "confirmed_replays": 2,
+        "false_different": 0,
+        "false_equivalent": 0,
+        "full_checks": 1,
+        "inconclusive_checks": 0,
+        "infrastructure_errors": 0,
+        "node_count_mismatches": 2,
+        "replay_errors": 0,
+        "row_checks": 6,
+        "row_errors": 0,
+        "row_inconclusive": 0,
+        "row_mismatches": 0,
+        "sat_disagreement_models": 2,
+        "type_bound_errors": 0,
+        "type_bound_inconclusive": 0,
+        "type_bound_mismatches": 0,
+        "type_bound_probes": 8,
+        "validation_inconclusive": 0,
+        "validation_mismatches": 0,
+        "verdict_counts_by_stage": {
+          "bounded": {
+            "DIFFERENT": 1
+          },
+          "full_range": {
+            "DIFFERENT": 1
+          }
+        },
+        "verdict_mismatches": 0,
+        "wrong_directions_by_stage": {
+          "bounded": {
+            "false_different": 0,
+            "false_equivalent": 0
+          },
+          "full_range": {
+            "false_different": 0,
+            "false_equivalent": 0
+          }
+        }
+      },
+      "scenario": "wrong-verdict-node-count"
+    },
+    {
+      "discrepancies": [
+        {
+          "actual": 4,
+          "case_id": "calibration-boundary-3-3",
+          "expected": 3,
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM t WHERE x > 0",
+            "field": "validation.original_nodes",
+            "original_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000
+          },
+          "stage": "calibration_node_count"
+        },
+        {
+          "actual": 4,
+          "case_id": "calibration-boundary-3-3",
+          "expected": 3,
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM t WHERE x > 0",
+            "field": "verify.original_nodes",
+            "original_sql": "SELECT row_id FROM t WHERE x >= 0",
+            "schema_sql": "CREATE TABLE t (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+            "timeout_ms": 5000
+          },
+          "stage": "calibration_node_count"
+        }
+      ],
+      "helper": "run_calibration",
+      "metrics": {
+        "calibration_cases": 3,
+        "calibration_checks": 3,
+        "calibration_confirmed_replay_rate": 1.0,
+        "calibration_confirmed_replays": 1,
+        "calibration_errors": 0,
+        "calibration_node_mismatches": 2,
+        "calibration_sat_disagreement_models": 1,
+        "calibration_validation_checks": 3
+      },
+      "scenario": "consistent-but-wrong-counts"
+    },
+    {
+      "discrepancies": [
+        {
+          "actual": 4,
+          "case_id": "calibration-e2-7-3",
+          "expected": 3,
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM jobs WHERE start_day >= 10",
+            "field": "verify.candidate_nodes",
+            "original_sql": "SELECT row_id FROM jobs WHERE start_day >= 10 AND end_day >= 10",
+            "schema_sql": "CREATE TABLE jobs (row_id BIGINT NOT NULL, start_day BIGINT NOT NULL, end_day BIGINT NOT NULL, CHECK (start_day <= end_day))",
+            "timeout_ms": 5000
+          },
+          "stage": "calibration_node_count"
+        },
+        {
+          "actual": 6,
+          "case_id": "calibration-e2-copy-7-7",
+          "expected": 7,
+          "inputs": {
+            "candidate_sql": "SELECT row_id FROM jobs WHERE start_day >= 10 AND end_day >= 10",
+            "field": "verify.candidate_nodes",
+            "original_sql": "SELECT row_id FROM jobs WHERE start_day >= 10 AND end_day >= 10",
+            "schema_sql": "CREATE TABLE jobs (row_id BIGINT NOT NULL, start_day BIGINT NOT NULL, end_day BIGINT NOT NULL, CHECK (start_day <= end_day))",
+            "timeout_ms": 5000
+          },
+          "stage": "calibration_node_count"
+        }
+      ],
+      "helper": "run_calibration",
+      "metrics": {
+        "calibration_cases": 3,
+        "calibration_checks": 3,
+        "calibration_confirmed_replay_rate": 1.0,
+        "calibration_confirmed_replays": 1,
+        "calibration_errors": 0,
+        "calibration_node_mismatches": 2,
+        "calibration_sat_disagreement_models": 1,
+        "calibration_validation_checks": 3
+      },
+      "scenario": "wrong-e2-simplification-and-copy-counts"
+    }
+  ],
+  "source": "evaluation/tests/test_verifier_probes.py hand-built fixed examples injected by test patches"
+}

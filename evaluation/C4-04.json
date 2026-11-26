@@ -1,0 +1,64 @@
+{
+  "task_id": "C4-04",
+  "family": "C4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE clipped_range (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM clipped_range WHERE (x <= -5 OR (x >= 1 AND x <= 10)) AND x >= 4",
+  "reference_sql": "SELECT row_id FROM clipped_range WHERE x >= 4 AND x <= 10",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "x": -6
+    },
+    {
+      "row_id": 2,
+      "x": -5
+    },
+    {
+      "row_id": 3,
+      "x": -4
+    },
+    {
+      "row_id": 4,
+      "x": 0
+    },
+    {
+      "row_id": 5,
+      "x": 1
+    },
+    {
+      "row_id": 6,
+      "x": 3
+    },
+    {
+      "row_id": 7,
+      "x": 4
+    },
+    {
+      "row_id": 8,
+      "x": 7
+    },
+    {
+      "row_id": 9,
+      "x": 10
+    },
+    {
+      "row_id": 10,
+      "x": 11
+    }
+  ],
+  "expected_rows": [
+    [
+      7
+    ],
+    [
+      8
+    ],
+    [
+      9
+    ]
+  ],
+  "derivation": "The outer lower bound x >= 4 eliminates the x <= -5 branch and intersects the surviving interval [1, 10] with [4, maximum BIGINT]. The result is exactly [4, 10], with the original upper endpoint still required.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, C4 seed (C4-01): the outer bound both eliminates a branch and clips the lower end of the survivor.",
+  "error_exposed": "Returning x >= 1 AND x <= 10 only removes the impossible branch but fails to clip the survivor, incorrectly including rows 5 and 6 (x = 1 and 3). Returning only x >= 4 also includes row 10 (x = 11) beyond the retained upper endpoint."
+}

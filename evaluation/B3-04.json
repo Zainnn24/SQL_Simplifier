@@ -1,0 +1,20 @@
+{
+  "task_id": "B3-04",
+  "family": "B3",
+  "split": "dev",
+  "schema_sql": "CREATE TABLE pinned_controls (row_id BIGINT NOT NULL, x BIGINT NOT NULL, y BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM pinned_controls WHERE (x >= -3 AND x <= -3) AND y >= 10",
+  "reference_sql": "SELECT row_id FROM pinned_controls WHERE x = -3 AND y >= 10",
+  "sample_rows": [
+    {"row_id": 1, "x": -4, "y": 10},
+    {"row_id": 2, "x": -3, "y": 9},
+    {"row_id": 3, "x": -3, "y": 10},
+    {"row_id": 4, "x": -3, "y": 11},
+    {"row_id": 5, "x": -2, "y": 10},
+    {"row_id": 6, "x": -3, "y": 0}
+  ],
+  "expected_rows": [[3], [4]],
+  "derivation": "The two inclusive bounds pin x to -3. Replacing their conjunction with x = -3 preserves the independent requirement y >= 10; both conditions must still hold.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B3 (B3-01), retaining an independent comparison on a second column.",
+  "error_exposed": "Returning only x = -3 drops y >= 10 and incorrectly includes rows 2 and 6 (y = 9 and 0)."
+}
