@@ -1,0 +1,86 @@
+{
+  "task_id": "C5-04",
+  "family": "C5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE local_gap (row_id BIGINT NOT NULL, x BIGINT NOT NULL, enabled BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM local_gap WHERE ((x <= -2 OR x >= 4) AND x != 1) OR enabled = 1",
+  "reference_sql": "SELECT row_id FROM local_gap WHERE (x <= -2 OR x >= 4) OR enabled = 1",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "x": -3,
+      "enabled": 0
+    },
+    {
+      "row_id": 2,
+      "x": -2,
+      "enabled": 0
+    },
+    {
+      "row_id": 3,
+      "x": -1,
+      "enabled": 0
+    },
+    {
+      "row_id": 4,
+      "x": 1,
+      "enabled": 0
+    },
+    {
+      "row_id": 5,
+      "x": 1,
+      "enabled": 1
+    },
+    {
+      "row_id": 6,
+      "x": 2,
+      "enabled": 0
+    },
+    {
+      "row_id": 7,
+      "x": 4,
+      "enabled": 0
+    },
+    {
+      "row_id": 8,
+      "x": 5,
+      "enabled": 0
+    },
+    {
+      "row_id": 9,
+      "x": 0,
+      "enabled": 1
+    },
+    {
+      "row_id": 10,
+      "x": 4,
+      "enabled": 1
+    }
+  ],
+  "expected_rows": [
+    [
+      1
+    ],
+    [
+      2
+    ],
+    [
+      5
+    ],
+    [
+      7
+    ],
+    [
+      8
+    ],
+    [
+      9
+    ],
+    [
+      10
+    ]
+  ],
+  "derivation": "Within the first branch, x <= -2 OR x >= 4 already rejects 1, so its local x != 1 is redundant. The enabled = 1 branch is independent and can admit x = 1; removing the local exclusion preserves that branch, whereas moving it outside the OR would change the query.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, C5 seed (C5-01): a redundant exclusion is scoped to one branch while a second-column branch can admit the same gap value.",
+  "error_exposed": "Hoisting x != 1 to the whole query, as ((x <= -2 OR x >= 4) OR enabled = 1) AND x != 1, incorrectly loses row 5 (x = 1, enabled = 1). Dropping the independent enabled branch loses rows 5 and 9. Rows 4 and 5 have the same x = 1 but different enabled values and must have different outcomes."
+}

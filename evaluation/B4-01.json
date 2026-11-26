@@ -1,0 +1,17 @@
+{
+  "task_id": "B4-01",
+  "family": "B4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE accounts (row_id BIGINT NOT NULL, balance_cents BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM accounts WHERE balance_cents >= 0 AND balance_cents != 0",
+  "reference_sql": "SELECT row_id FROM accounts WHERE balance_cents > 0",
+  "sample_rows": [
+    {"row_id": 1, "balance_cents": -1},
+    {"row_id": 2, "balance_cents": 0},
+    {"row_id": 3, "balance_cents": 1}
+  ],
+  "expected_rows": [[3]],
+  "derivation": "For every non-null BIGINT balance_cents, being at least zero and unequal to zero is equivalent to being strictly positive. The excluded endpoint changes the inclusive lower bound to a strict one.",
+  "source": "SQL_Predicate_Family_Examples.sql, B4. Rule instance from PostgreSQL 17, sections 8.17.3 and 8.17.7, https://www.postgresql.org/docs/17/rangetypes.html",
+  "error_exposed": "Keeping only balance_cents >= 0 incorrectly includes row 2 (balance_cents = 0)."
+}

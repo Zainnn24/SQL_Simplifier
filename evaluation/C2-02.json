@@ -1,0 +1,20 @@
+{
+  "task_id": "C2-02",
+  "family": "C2",
+  "split": "test",
+  "schema_sql": "CREATE TABLE negative_stages (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM negative_stages WHERE x = -5 OR x = -4 OR x = -3 OR x = -2",
+  "reference_sql": "SELECT row_id FROM negative_stages WHERE x >= -5 AND x <= -2",
+  "sample_rows": [
+    {"row_id": 1, "x": -6},
+    {"row_id": 2, "x": -5},
+    {"row_id": 3, "x": -4},
+    {"row_id": 4, "x": -3},
+    {"row_id": 5, "x": -2},
+    {"row_id": 6, "x": -1}
+  ],
+  "expected_rows": [[2], [3], [4], [5]],
+  "derivation": "The four listed negative values are consecutive integers. Their union is exactly the inclusive interval [-5, -2], with no intermediate integer omitted. Both negative endpoints must remain included; the adjacent integers -6 and -1 remain excluded.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C2 seed (C2-01): extend the three-point list to four consecutive negative integers.",
+  "error_exposed": "Returning WHERE x > -5 AND x < -2 replaces the inclusive endpoints with strict bounds and incorrectly misses row 2 (x = -5) and row 5 (x = -2). Rows 1 and 6 also expose a range widened beyond the listed negative values."
+}

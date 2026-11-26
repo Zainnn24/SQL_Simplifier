@@ -1,0 +1,19 @@
+{
+  "task_id": "B5-01",
+  "family": "B5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE counters (row_id BIGINT NOT NULL, counter_value BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM counters WHERE counter_value <= 9223372036854775807",
+  "reference_sql": "SELECT row_id FROM counters WHERE TRUE",
+  "sample_rows": [
+    {"row_id": 1, "counter_value": -9223372036854775808},
+    {"row_id": 2, "counter_value": -1},
+    {"row_id": 3, "counter_value": 0},
+    {"row_id": 4, "counter_value": 9223372036854775806},
+    {"row_id": 5, "counter_value": 9223372036854775807}
+  ],
+  "expected_rows": [[1], [2], [3], [4], [5]],
+  "derivation": "Every legal counter_value is a non-null signed BIGINT and therefore at most 9223372036854775807. The original predicate is true on every legal row and is equivalent to TRUE over the complete declared type domain.",
+  "source": "SQL_Predicate_Family_Examples.sql, B5. Adapted from MySQL 8.4 Reference Manual, section 10.2.1.14, Constant-Folding Optimization, https://dev.mysql.com/doc/refman/8.4/en/constant-folding-optimization.html",
+  "error_exposed": "Using counter_value < 9223372036854775807 instead of TRUE loses row 5 at the signed BIGINT maximum."
+}

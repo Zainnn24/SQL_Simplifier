@@ -1,0 +1,20 @@
+{
+  "task_id": "B4-03",
+  "family": "B4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE bounded_endpoints (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM bounded_endpoints WHERE x >= -2 AND x <= 3 AND x != -2",
+  "reference_sql": "SELECT row_id FROM bounded_endpoints WHERE x > -2 AND x <= 3",
+  "sample_rows": [
+    {"row_id": 1, "x": -3},
+    {"row_id": 2, "x": -2},
+    {"row_id": 3, "x": -1},
+    {"row_id": 4, "x": 2},
+    {"row_id": 5, "x": 3},
+    {"row_id": 6, "x": 4}
+  ],
+  "expected_rows": [[3], [4], [5]],
+  "derivation": "For every non-null BIGINT x, the conjunction x >= -2 AND x != -2 is equivalent to x > -2. Conjoining the unchanged upper bound x <= 3 on both sides preserves equivalence and keeps the upper endpoint included.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B4 (B4-01), excluding one endpoint of a two-sided interval.",
+  "error_exposed": "Returning only x > -2 drops x <= 3 and incorrectly includes row 6 (x = 4)."
+}

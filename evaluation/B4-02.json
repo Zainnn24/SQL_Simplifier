@@ -1,0 +1,19 @@
+{
+  "task_id": "B4-02",
+  "family": "B4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE upper_endpoints (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM upper_endpoints WHERE x <= -2 AND x != -2",
+  "reference_sql": "SELECT row_id FROM upper_endpoints WHERE x < -2",
+  "sample_rows": [
+    {"row_id": 1, "x": -4},
+    {"row_id": 2, "x": -3},
+    {"row_id": 3, "x": -2},
+    {"row_id": 4, "x": -1},
+    {"row_id": 5, "x": 0}
+  ],
+  "expected_rows": [[1], [2]],
+  "derivation": "For every non-null BIGINT x, x <= -2 permits exactly the values below -2 together with -2 itself. Excluding that endpoint leaves exactly x < -2. This applies to an upper bound at a negative endpoint rather than the seed's lower bound.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B4 (B4-01), excluding a negative upper endpoint.",
+  "error_exposed": "Keeping only x <= -2 incorrectly includes row 3 (x = -2), the excluded upper endpoint."
+}

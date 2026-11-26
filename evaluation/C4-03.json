@@ -1,0 +1,81 @@
+{
+  "task_id": "C4-03",
+  "family": "C4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE surviving_ranges (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM surviving_ranges WHERE (x <= -4 OR (x >= 0 AND x <= 2) OR (x >= 6 AND x <= 9)) AND x >= -1",
+  "reference_sql": "SELECT row_id FROM surviving_ranges WHERE (x >= 0 AND x <= 2) OR (x >= 6 AND x <= 9)",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "x": -5
+    },
+    {
+      "row_id": 2,
+      "x": -4
+    },
+    {
+      "row_id": 3,
+      "x": -1
+    },
+    {
+      "row_id": 4,
+      "x": 0
+    },
+    {
+      "row_id": 5,
+      "x": 1
+    },
+    {
+      "row_id": 6,
+      "x": 2
+    },
+    {
+      "row_id": 7,
+      "x": 3
+    },
+    {
+      "row_id": 8,
+      "x": 5
+    },
+    {
+      "row_id": 9,
+      "x": 6
+    },
+    {
+      "row_id": 10,
+      "x": 8
+    },
+    {
+      "row_id": 11,
+      "x": 9
+    },
+    {
+      "row_id": 12,
+      "x": 10
+    }
+  ],
+  "expected_rows": [
+    [
+      4
+    ],
+    [
+      5
+    ],
+    [
+      6
+    ],
+    [
+      9
+    ],
+    [
+      10
+    ],
+    [
+      11
+    ]
+  ],
+  "derivation": "The outer lower bound x >= -1 removes the x <= -4 branch. Both finite intervals [0, 2] and [6, 9] already imply x >= -1, so both survive intact. Their intervening gap remains excluded.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, C4 seed (C4-01): an outer bound removes one of three branches and preserves two disjoint finite intervals.",
+  "error_exposed": "Keeping only x >= 6 AND x <= 9 incorrectly loses rows 4, 5 and 6 from the other surviving interval. Replacing the survivors by x >= 0 AND x <= 9 incorrectly includes rows 7 and 8 (x = 3 and 5) in the gap."
+}

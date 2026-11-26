@@ -1,0 +1,19 @@
+{
+  "task_id": "B5-03",
+  "family": "B5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE impossible_bounds (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM impossible_bounds WHERE x > 9223372036854775807",
+  "reference_sql": "SELECT row_id FROM impossible_bounds WHERE FALSE",
+  "sample_rows": [
+    {"row_id": 1, "x": -9223372036854775808},
+    {"row_id": 2, "x": -1},
+    {"row_id": 3, "x": 0},
+    {"row_id": 4, "x": 9223372036854775806},
+    {"row_id": 5, "x": 9223372036854775807}
+  ],
+  "expected_rows": [],
+  "derivation": "No legal signed BIGINT x exceeds 9223372036854775807. The strict comparison with the in-range maximum is false on every legal row, so it is equivalent to FALSE without using an out-of-range SQL literal.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B5 (B5-01), turning the maximum type limit into an impossible strict comparison.",
+  "error_exposed": "Returning x >= 9223372036854775807 incorrectly includes row 5 at the signed BIGINT maximum even though the original selects no row."
+}

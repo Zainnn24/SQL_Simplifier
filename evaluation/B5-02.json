@@ -1,0 +1,19 @@
+{
+  "task_id": "B5-02",
+  "family": "B5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE minimum_bounds (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM minimum_bounds WHERE x >= -9223372036854775808",
+  "reference_sql": "SELECT row_id FROM minimum_bounds WHERE TRUE",
+  "sample_rows": [
+    {"row_id": 1, "x": -9223372036854775808},
+    {"row_id": 2, "x": -9223372036854775807},
+    {"row_id": 3, "x": -1},
+    {"row_id": 4, "x": 0},
+    {"row_id": 5, "x": 9223372036854775807}
+  ],
+  "expected_rows": [[1], [2], [3], [4], [5]],
+  "derivation": "Every non-null signed BIGINT x is at least -9223372036854775808. The inclusive lower-bound predicate therefore holds for every legal row, including the signed minimum itself, and is equivalent to TRUE across the entire type domain.",
+  "source": "Team-derived variant of SQL_Predicate_Family_Examples.sql, B5 (B5-01), using the signed minimum lower bound and its adjacent value.",
+  "error_exposed": "Returning x > -9223372036854775808 changes the inclusive type bound to a strict bound and loses row 1 at the signed BIGINT minimum."
+}

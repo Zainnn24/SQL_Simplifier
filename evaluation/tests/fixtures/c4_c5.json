@@ -1,0 +1,356 @@
+[
+  {
+    "task_id": "C4-01",
+    "author_nodes": {
+      "original": 11,
+      "reference": 3
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "The outer minimum removes the early branch; retain the inclusive surviving endpoint 9.",
+    "expected_rows": [
+      [
+        5
+      ],
+      [
+        6
+      ]
+    ],
+    "wrong_references": []
+  },
+  {
+    "task_id": "C4-02",
+    "author_nodes": {
+      "original": 15,
+      "reference": 7
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "An upper bound removes the right branch but preserves both endpoints of the finite left interval [-5, -1].",
+    "expected_rows": [
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        4
+      ]
+    ],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM upper_cut WHERE (x >= -5 AND x <= -1) OR x >= 4",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            8
+          ],
+          [
+            9
+          ]
+        ]
+      },
+      {
+        "sql": "SELECT row_id FROM upper_cut WHERE x <= -1",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            1
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "task_id": "C4-03",
+    "author_nodes": {
+      "original": 23,
+      "reference": 15
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "Remove one of three branches and retain both disjoint survivors [0, 2] and [6, 9], including their four endpoints.",
+    "expected_rows": [
+      [
+        4
+      ],
+      [
+        5
+      ],
+      [
+        6
+      ],
+      [
+        9
+      ],
+      [
+        10
+      ],
+      [
+        11
+      ]
+    ],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM surviving_ranges WHERE x >= 6 AND x <= 9",
+        "missing_rows": [
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ]
+        ],
+        "unexpected_rows": []
+      },
+      {
+        "sql": "SELECT row_id FROM surviving_ranges WHERE x >= 0 AND x <= 9",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            7
+          ],
+          [
+            8
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "task_id": "C4-04",
+    "author_nodes": {
+      "original": 15,
+      "reference": 7
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "The outer minimum removes one branch and clips the surviving interval from [1, 10] to [4, 10].",
+    "expected_rows": [
+      [
+        7
+      ],
+      [
+        8
+      ],
+      [
+        9
+      ]
+    ],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM clipped_range WHERE x >= 1 AND x <= 10",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            5
+          ],
+          [
+            6
+          ]
+        ]
+      },
+      {
+        "sql": "SELECT row_id FROM clipped_range WHERE x >= 4",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            10
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "task_id": "C5-01",
+    "author_nodes": {
+      "original": 19,
+      "reference": 15
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "Exclude the live value 4 but remove only the redundant exclusion of gap value 11.",
+    "expected_rows": [
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        5
+      ],
+      [
+        6
+      ],
+      [
+        10
+      ]
+    ],
+    "wrong_references": []
+  },
+  {
+    "task_id": "C5-02",
+    "author_nodes": {
+      "original": 23,
+      "reference": 15
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "Both excluded values 5 and 6 lie in the gap [4, 7]; both finite live intervals remain separate.",
+    "expected_rows": [
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        8
+      ],
+      [
+        9
+      ]
+    ],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM double_gap WHERE x >= 0 AND x <= 10",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ],
+          [
+            7
+          ]
+        ]
+      },
+      {
+        "sql": "SELECT row_id FROM double_gap WHERE x >= 0 AND x <= 3",
+        "missing_rows": [
+          [
+            8
+          ],
+          [
+            9
+          ]
+        ],
+        "unexpected_rows": []
+      }
+    ]
+  },
+  {
+    "task_id": "C5-03",
+    "author_nodes": {
+      "original": 27,
+      "reference": 23
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "Preserve distinct effective exclusions in both live branches; remove only the outer gap exclusion at 3.",
+    "expected_rows": [
+      [
+        2
+      ],
+      [
+        3
+      ],
+      [
+        5
+      ],
+      [
+        6
+      ],
+      [
+        10
+      ],
+      [
+        11
+      ],
+      [
+        13
+      ],
+      [
+        14
+      ]
+    ],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM excluded_branches WHERE (x >= -4 AND x <= 0) OR ((x >= 6 AND x <= 10) AND x != 8)",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            4
+          ]
+        ]
+      },
+      {
+        "sql": "SELECT row_id FROM excluded_branches WHERE ((x >= -4 AND x <= 0) AND x != -2) OR (x >= 6 AND x <= 10)",
+        "missing_rows": [],
+        "unexpected_rows": [
+          [
+            12
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "task_id": "C5-04",
+    "author_nodes": {
+      "original": 15,
+      "reference": 11
+    },
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "A local exclusion is redundant only in its own branch; the independent enabled branch admits x = 1.",
+    "expected_rows": [
+      [
+        1
+      ],
+      [
+        2
+      ],
+      [
+        5
+      ],
+      [
+        7
+      ],
+      [
+        8
+      ],
+      [
+        9
+      ],
+      [
+        10
+      ]
+    ],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM local_gap WHERE ((x <= -2 OR x >= 4) OR enabled = 1) AND x != 1",
+        "missing_rows": [
+          [
+            5
+          ]
+        ],
+        "unexpected_rows": []
+      },
+      {
+        "sql": "SELECT row_id FROM local_gap WHERE x <= -2 OR x >= 4",
+        "missing_rows": [
+          [
+            5
+          ],
+          [
+            9
+          ]
+        ],
+        "unexpected_rows": []
+      }
+    ]
+  }
+]

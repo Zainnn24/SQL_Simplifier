@@ -99,28 +99,61 @@ class DevelopmentFamilyTests(unittest.TestCase):
                     self.assertTrue(result.passed, format_check(result))
                     self.assertEqual(Counter(result.actual_rows), expected)
 
-    def test_review_assignments_cover_all_eight_development_tasks(self):
-        path = ROOT / "evaluation/benchmark_reviews.jsonl"
+    def assert_development_review_assignments(self, path):
         reviews = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         required = {
             "task_id", "author_role", "reviewer_role", "review_status",
             "review_notes", "check_removal_test",
         }
         for task_id in TASK_IDS:
-            with self.subTest(task_id=task_id):
-                matches = [record for record in reviews if record["task_id"] == task_id]
-                self.assertEqual(len(matches), 1)
-                review = matches[0]
-                self.assertTrue(required.issubset(review))
-                self.assertEqual(review["author_role"], "evaluation")
-                self.assertEqual(review["reviewer_role"], "llm")
-                self.assertIn(review["review_status"], ("PENDING", "APPROVED"))
-                if review["review_status"] == "PENDING":
-                    self.assertIsNone(review["review_notes"])
-                else:
-                    self.assertIsInstance(review["review_notes"], str)
-                    self.assertTrue(review["review_notes"].strip())
-                self.assertIsNone(review["check_removal_test"])
+            matches = [record for record in reviews if record["task_id"] == task_id]
+            self.assertEqual(len(matches), 1, task_id)
+            review = matches[0]
+            self.assertTrue(required.issubset(review), task_id)
+            self.assertEqual(review["author_role"], "evaluation")
+            self.assertEqual(review["reviewer_role"], "llm")
+            self.assertIn(review["review_status"], ("PENDING", "APPROVED"))
+            notes = review["review_notes"]
+            self.assertTrue(notes is None or isinstance(notes, str))
+            if review["review_status"] == "APPROVED":
+                self.assertIsInstance(notes, str)
+                self.assertTrue(notes.strip())
+            self.assertIsNone(review["check_removal_test"])
+
+    def test_review_assignments_cover_all_eight_development_tasks(self):
+        self.assert_development_review_assignments(ROOT / "evaluation/benchmark_reviews.jsonl")
+
+    def test_pending_feedback_is_allowed_in_temporary_review_records(self):
+        source = ROOT / "evaluation/benchmark_reviews.jsonl"
+        before = source.read_bytes()
+        reviews = [json.loads(line) for line in source.read_text(encoding="utf-8").splitlines() if line.strip()]
+        selected = next(record for record in reviews if record["task_id"] == "B3-01")
+        selected["review_status"] = "PENDING"
+        selected["review_notes"] = "Changes requested: explain the endpoint and retain the boundary sample."
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "benchmark_reviews.jsonl"
+            path.write_text("".join(json.dumps(record) + "\n" for record in reviews), encoding="utf-8")
+            self.assert_development_review_assignments(path)
+        self.assertEqual(source.read_bytes(), before)
+
+    def test_approved_reviews_require_nonempty_notes_in_temporary_records(self):
+        source = ROOT / "evaluation/benchmark_reviews.jsonl"
+        before = source.read_bytes()
+        reviews = [json.loads(line) for line in source.read_text(encoding="utf-8").splitlines() if line.strip()]
+        selected = next(record for record in reviews if record["task_id"] == "B3-01")
+        selected["review_status"] = "APPROVED"
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "benchmark_reviews.jsonl"
+            for notes in (None, "", "   "):
+                with self.subTest(notes=notes):
+                    selected["review_notes"] = notes
+                    path.write_text("".join(json.dumps(record) + "\n" for record in reviews), encoding="utf-8")
+                    with self.assertRaises(AssertionError):
+                        self.assert_development_review_assignments(path)
+            selected["review_notes"] = "Independently reviewed: both inclusive bounds identify the same point."
+            path.write_text("".join(json.dumps(record) + "\n" for record in reviews), encoding="utf-8")
+            self.assert_development_review_assignments(path)
+        self.assertEqual(source.read_bytes(), before)
 
     def assert_wrong_references_detected(self, task_id):
         source_path = ROOT / "evaluation" / f"{task_id}.json"

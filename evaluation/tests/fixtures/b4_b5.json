@@ -1,0 +1,102 @@
+[
+  {
+    "task_id": "B4-01",
+    "author_nodes": {"original": 7, "reference": 3},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "Seed samples -1, 0 and 1 retain only the positive balance; the inclusive zero endpoint is excluded.",
+    "expected_rows": [[3]],
+    "wrong_references": []
+  },
+  {
+    "task_id": "B4-02",
+    "author_nodes": {"original": 7, "reference": 3},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "A negative upper endpoint -2 is excluded; -3 and -4 qualify while -2, -1 and 0 do not.",
+    "expected_rows": [[1], [2]],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM upper_endpoints WHERE x <= -2",
+        "missing_rows": [],
+        "unexpected_rows": [[3]]
+      }
+    ]
+  },
+  {
+    "task_id": "B4-03",
+    "author_nodes": {"original": 11, "reference": 7},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "The two-sided interval excludes -2 but includes 3; -3 and 4 test both exterior neighbors, and -1 and 2 remain inside.",
+    "expected_rows": [[3], [4], [5]],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM bounded_endpoints WHERE x > -2",
+        "missing_rows": [],
+        "unexpected_rows": [[6]]
+      }
+    ]
+  },
+  {
+    "task_id": "B4-04",
+    "author_nodes": {"original": 11, "reference": 7},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "For y = 6 the first branch admits only x = 1; the independent y = 7 branch also admits x = -1 and x = 0.",
+    "expected_rows": [[3], [4], [5], [6]],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM endpoint_branches WHERE x > 0",
+        "missing_rows": [[4], [5]],
+        "unexpected_rows": []
+      }
+    ]
+  },
+  {
+    "task_id": "B5-01",
+    "author_nodes": {"original": 3, "reference": 1},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "The original seed includes the signed BIGINT minimum and maximum, maximum minus one, -1 and 0; every legal sample qualifies.",
+    "expected_rows": [[1], [2], [3], [4], [5]],
+    "wrong_references": []
+  },
+  {
+    "task_id": "B5-02",
+    "author_nodes": {"original": 3, "reference": 1},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "The signed minimum -9223372036854775808 and its successor both qualify, together with -1, 0 and the signed maximum.",
+    "expected_rows": [[1], [2], [3], [4], [5]],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM minimum_bounds WHERE x > -9223372036854775808",
+        "missing_rows": [[1]],
+        "unexpected_rows": []
+      }
+    ]
+  },
+  {
+    "task_id": "B5-03",
+    "author_nodes": {"original": 3, "reference": 1},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "The strict comparison against the in-range signed maximum rejects every legal sample, including the maximum itself and its predecessor.",
+    "expected_rows": [],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM impossible_bounds WHERE x >= 9223372036854775807",
+        "missing_rows": [],
+        "unexpected_rows": [[5]]
+      }
+    ]
+  },
+  {
+    "task_id": "B5-04",
+    "author_nodes": {"original": 7, "reference": 3},
+    "production_verifier_status": "PENDING_EXPERIMENT_A",
+    "boundary": "At both signed x extrema, y = 9 is rejected and y = 10 is accepted; an interior x and the predecessor of the maximum also exercise the retained y restriction.",
+    "expected_rows": [[2], [3], [5], [6]],
+    "wrong_references": [
+      {
+        "sql": "SELECT row_id FROM bounded_controls WHERE x <= 9223372036854775807",
+        "missing_rows": [],
+        "unexpected_rows": [[1], [4]]
+      }
+    ]
+  }
+]

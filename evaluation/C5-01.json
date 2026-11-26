@@ -1,0 +1,70 @@
+{
+  "task_id": "C5-01",
+  "family": "C5",
+  "split": "test",
+  "schema_sql": "CREATE TABLE measurements (row_id BIGINT NOT NULL, reading BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM measurements WHERE ((reading > 0 AND reading <= 8) OR reading >= 14) AND reading != 4 AND reading != 11",
+  "reference_sql": "SELECT row_id FROM measurements WHERE ((reading > 0 AND reading <= 8) OR reading >= 14) AND reading != 4",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "reading": 0
+    },
+    {
+      "row_id": 2,
+      "reading": 1
+    },
+    {
+      "row_id": 3,
+      "reading": 3
+    },
+    {
+      "row_id": 4,
+      "reading": 4
+    },
+    {
+      "row_id": 5,
+      "reading": 5
+    },
+    {
+      "row_id": 6,
+      "reading": 8
+    },
+    {
+      "row_id": 7,
+      "reading": 9
+    },
+    {
+      "row_id": 8,
+      "reading": 11
+    },
+    {
+      "row_id": 9,
+      "reading": 13
+    },
+    {
+      "row_id": 10,
+      "reading": 14
+    }
+  ],
+  "expected_rows": [
+    [
+      2
+    ],
+    [
+      3
+    ],
+    [
+      5
+    ],
+    [
+      6
+    ],
+    [
+      10
+    ]
+  ],
+  "derivation": "The union admits values greater than 0 through 8 and values at least 14, so it already rejects 11 in the gap. The reading != 11 comparison is redundant. The reading != 4 comparison must remain because 4 belongs to the first live interval.",
+  "source": "data/SQL_Predicate_Family_Examples.sql, C5 seed. Test adaptation of Apache Calcite RexProgramTest.java, testSimplifyRange, commit 57ad4ff: https://github.com/apache/calcite/blob/57ad4ffb1ed9b86d18fcfd7627fdf5c4227bc172/core/src/test/java/org/apache/calcite/rex/RexProgramTest.java#L1589-L1605",
+  "error_exposed": "Removing both exclusions incorrectly includes row 4 (reading = 4). Filling the gap between the two live intervals incorrectly admits rows 7, 8 and 9 (reading = 9, 11 and 13)."
+}

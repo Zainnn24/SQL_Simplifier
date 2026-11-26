@@ -1,0 +1,22 @@
+{
+  "task_id": "C2-03",
+  "family": "C2",
+  "split": "test",
+  "schema_sql": "CREATE TABLE stages_with_outlier (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM stages_with_outlier WHERE x = 2 OR x = 3 OR x = 4 OR x = 9",
+  "reference_sql": "SELECT row_id FROM stages_with_outlier WHERE (x >= 2 AND x <= 4) OR x = 9",
+  "sample_rows": [
+    {"row_id": 1, "x": 1},
+    {"row_id": 2, "x": 2},
+    {"row_id": 3, "x": 3},
+    {"row_id": 4, "x": 4},
+    {"row_id": 5, "x": 5},
+    {"row_id": 6, "x": 8},
+    {"row_id": 7, "x": 9},
+    {"row_id": 8, "x": 10}
+  ],
+  "expected_rows": [[2], [3], [4], [7]],
+  "derivation": "Only 2, 3, and 4 form a consecutive run, so those three equalities can become the inclusive interval [2, 4]. The isolated value 9 remains a separate equality. Values in the gap between 4 and 9 are not in the original list and must stay excluded.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C2 seed (C2-01): retain one isolated point beside a consecutive run.",
+  "error_exposed": "Returning WHERE x >= 2 AND x <= 9 incorrectly bridges the gap and includes row 5 (x = 5) and row 6 (x = 8). Returning only WHERE x >= 2 AND x <= 4 drops the isolated live alternative and incorrectly misses row 7 (x = 9)."
+}

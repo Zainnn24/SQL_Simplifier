@@ -1,0 +1,20 @@
+{
+  "task_id": "C3-03",
+  "family": "C3",
+  "split": "test",
+  "schema_sql": "CREATE TABLE guarded_gap (row_id BIGINT NOT NULL, x BIGINT NOT NULL, enabled BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM guarded_gap WHERE (x < 0 OR x > 0) AND enabled = 1",
+  "reference_sql": "SELECT row_id FROM guarded_gap WHERE x != 0 AND enabled = 1",
+  "sample_rows": [
+    {"row_id": 1, "x": -1, "enabled": 1},
+    {"row_id": 2, "x": 0, "enabled": 1},
+    {"row_id": 3, "x": 1, "enabled": 1},
+    {"row_id": 4, "x": -1, "enabled": 0},
+    {"row_id": 5, "x": 1, "enabled": 0},
+    {"row_id": 6, "x": 0, "enabled": 0}
+  ],
+  "expected_rows": [[1], [3]],
+  "derivation": "The strict ranges on x together exclude only zero. Replacing that union with x != 0 preserves its truth value, but the independent enabled = 1 conjunct must still hold. This equivalence does not restrict the legal BIGINT domain of enabled to the two sampled values.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C3 seed (C3-01): simplify a one-point gap while retaining a condition on a second column. The reference is a team derivation.",
+  "error_exposed": "Returning WHERE x != 0 drops the enabled = 1 restriction and incorrectly includes row 4 (x = -1, enabled = 0) and row 5 (x = 1, enabled = 0). Row 2 checks that zero stays excluded even when the guard holds, and rows 1 and 3 preserve the two live sides of the gap."
+}

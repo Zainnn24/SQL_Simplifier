@@ -1,0 +1,21 @@
+{
+  "task_id": "C3-04",
+  "family": "C3",
+  "split": "test",
+  "schema_sql": "CREATE TABLE windowed_gap (row_id BIGINT NOT NULL, x BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM windowed_gap WHERE (x >= -3 AND x <= 3) AND (x < 0 OR x > 0)",
+  "reference_sql": "SELECT row_id FROM windowed_gap WHERE x >= -3 AND x <= 3 AND x != 0",
+  "sample_rows": [
+    {"row_id": 1, "x": -4},
+    {"row_id": 2, "x": -3},
+    {"row_id": 3, "x": -1},
+    {"row_id": 4, "x": 0},
+    {"row_id": 5, "x": 1},
+    {"row_id": 6, "x": 3},
+    {"row_id": 7, "x": 4}
+  ],
+  "expected_rows": [[2], [3], [5], [6]],
+  "derivation": "Within the inclusive window [-3, 3], the strict ranges x < 0 and x > 0 exclude exactly zero. Replacing that union with x != 0 is valid only while keeping both outer window bounds, so the complete result remains the bounded window with one point removed.",
+  "source": "Team-derived variant of data/SQL_Predicate_Family_Examples.sql, family C3 seed (C3-01): place the one-point gap inside an inclusive bounded window. The reference is a team derivation.",
+  "error_exposed": "Returning WHERE x != 0 drops the window and incorrectly includes row 1 (x = -4) and row 7 (x = 4). Returning only WHERE x >= -3 AND x <= 3 fills the gap and incorrectly includes row 4 (x = 0). Rows 2 and 6 ensure both window endpoints survive, and rows 3 and 5 retain the immediate neighbors of the excluded point."
+}

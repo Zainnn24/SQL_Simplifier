@@ -1,0 +1,45 @@
+{
+  "task_id": "C4-01",
+  "family": "C4",
+  "split": "test",
+  "schema_sql": "CREATE TABLE bookings (row_id BIGINT NOT NULL, lead_days BIGINT NOT NULL)",
+  "original_sql": "SELECT row_id FROM bookings WHERE (lead_days <= 2 OR lead_days >= 9) AND lead_days >= 5",
+  "reference_sql": "SELECT row_id FROM bookings WHERE lead_days >= 9",
+  "sample_rows": [
+    {
+      "row_id": 1,
+      "lead_days": 2
+    },
+    {
+      "row_id": 2,
+      "lead_days": 3
+    },
+    {
+      "row_id": 3,
+      "lead_days": 5
+    },
+    {
+      "row_id": 4,
+      "lead_days": 8
+    },
+    {
+      "row_id": 5,
+      "lead_days": 9
+    },
+    {
+      "row_id": 6,
+      "lead_days": 10
+    }
+  ],
+  "expected_rows": [
+    [
+      5
+    ],
+    [
+      6
+    ]
+  ],
+  "derivation": "The outer condition lead_days >= 5 rules out the branch lead_days <= 2. Every value satisfying the surviving lead_days >= 9 branch already satisfies the outer condition, so that branch alone selects exactly the same legal rows.",
+  "source": "data/SQL_Predicate_Family_Examples.sql, C4 seed. Rule instance of range intersection from PostgreSQL 17, section 9.20: https://www.postgresql.org/docs/17/functions-range.html",
+  "error_exposed": "Returning only lead_days >= 5 incorrectly includes row 3 (lead_days = 5) and row 4 (lead_days = 8). Returning lead_days > 9 incorrectly loses row 5 at the surviving inclusive endpoint."
+}
