@@ -29,8 +29,7 @@ From the repository root using the existing isolated environment:
 
 The second command actually returns **2**, not a formal success. The manifest
 packages the existing 32 task JSON records exactly, in sorted task_id order.
-It is Martin's partial receipt, not the frozen team benchmark. No task or review
-decision was added, and the remaining 68 tasks were not authored in this work.
+The receipt covers Martin's contribution to the 100-task team benchmark.
 
 | Actual receipt | Result |
 | --- | --- |
@@ -38,7 +37,7 @@ decision was added, and the remaining 68 tasks were not authored in this work.
 | Complete received families | B3, B4, B5, C1, C2, C3, C4, C5; four tasks each |
 | Split | dev 8, test 24 |
 | Missing contributions | LLM 36 tasks; verifier 32 tasks |
-| Review records | 32 PENDING, 0 APPROVED; no independent approval claimed |
+| Review records | 8 APPROVED (B3 and C1), 24 PENDING |
 | Query checks against expected multisets | 64/64 |
 | Seed input checks | 8/8 |
 | Seed DDL/original/reference fidelity triples | 8/8 |
@@ -47,7 +46,7 @@ decision was added, and the remaining 68 tasks were not authored in this work.
 | Formal | FORMAL_BLOCKED, exit 2 |
 
 Missing families are A1-A5, B1-B2, D1-D5 and E1-E5. The formal report lists all
-68 absent IDs, all 32 unapproved IDs, the four missing production interfaces
+68 absent IDs, the 24 pending reviews, the four missing production interfaces
 and the missing successful production Experiment A evidence separately.
 
 ## Validation gates
@@ -129,10 +128,10 @@ Generate new production evidence once David delivers the implementation:
 .\.venv\Scripts\python.exe -m evaluation validate-benchmark --manifest benchmark.jsonl --reviews benchmark_reviews.jsonl --mode formal --experiment-a-report evaluation/results/experiment_a_production.json --timeout-ms 5000 --output results/benchmark_acceptance.json
 ```
 
-Current David/main remain c2030c1784ec0517add6fe0536ac8d0d40fec06f with plans only;
-Alvin remains a9ff6de685e84098f9669bf26330dd02c331ab42 with an empty pipeline
-skeleton. Production Experiment A therefore actually remains NOT_RUN / exit 2.
-Alvin's generated scripted traces and task reviews remain outstanding.
+The saved production Experiment A report records NOT_RUN (exit 2). Alvin's
+scripted pipeline handoff at `88b87d0c0ceb9754ea3bd7f532eff87ce2ab9cb8`
+uses the E2-01 verifier stub. Both regenerated traces passed the scorer with
+zero issues. His eight independent approvals are in `benchmark_reviews.jsonl`.
 
 ## Reproduction and regression
 
@@ -147,8 +146,8 @@ The two scored scripted batches and exact-byte hash checks are documented in
 `CLOSEOUT_A.md`. Scoped LF attributes also cover the new draft manifest, real
 review file, SQL seed and D1 reports, without changing the seed or review records
 in Git. Hashes always describe actual input bytes, not normalized surrogate data.
-The 32 task source records, real reviews and SQL seeds retain their baseline Git
-contents. No model experiment, prompt tuning or fabricated approval was performed.
+The review update preserves all 32 task files and the SQL seeds. Both saved
+receipt reports hash the updated review file.
 
 The final complete evaluation suite passed **202/202** tests. Author checks still
 pass 24/24 seed checks, 64/64 query checks, 26/26 wrong-reference captures across
@@ -156,8 +155,8 @@ pass 24/24 seed checks, 64/64 query checks, 26/26 wrong-reference captures acros
 Experiment A offline retains 30 fixtures, 10 independent replays, 182 finite
 assignments (157 legal rows) and eight separate BIGINT probes.
 
-A fresh checkout made from the staged Git index passed all three hash regression
-tests: 15 saved hash references match actual input bytes. Both scoring commands
+At the initial receipt, a fresh checkout of the staged Git index passed all
+three hash regression tests against 15 saved input hashes. Both scoring commands
 were repeated twice there; their JSON and text outputs were byte-identical to
 each other and to the saved reports. Fresh draft/formal benchmark commands
 returned 0/2 respectively and reproduced their saved JSON reports byte-for-byte.

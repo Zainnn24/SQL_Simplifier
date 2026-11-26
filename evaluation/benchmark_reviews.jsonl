@@ -1,11 +1,11 @@
-{"task_id": "B3-01", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "B3-02", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "B3-03", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "B3-04", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "C1-01", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "C1-02", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "C1-03", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
-{"task_id": "C1-04", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
+{"task_id": "B3-01", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "Both bounds pin weight to 15 (7 → 3 nodes). Weights 14 and 16 catch either dropped bound.", "check_removal_test": null}
+{"task_id": "B3-02", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "Negating the pinned value excludes exactly −2 (8 → 3 nodes). The −2 sample catches a rewrite to TRUE.", "check_removal_test": null}
+{"task_id": "B3-03", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "The pinned value −4 and the separate interval [2,5] both survive (15 → 11 nodes). Samples at −4 and within [2,5] catch either dropped branch.", "check_removal_test": null}
+{"task_id": "B3-04", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "The bounds pin x to −3 while preserving y ≥ 10 (11 → 7 nodes). At x = −3, y = 9 and y = 0 catch a dropped condition.", "check_removal_test": null}
+{"task_id": "C1-01", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "The overlap merges to [10,25] and the ≥40 branch survives (19 → 11 nodes). Reading 40 catches a dropped branch, and 26 and 39 catch a filled gap.", "check_removal_test": null}
+{"task_id": "C1-02", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "The three overlapping intervals merge to [0,10] (23 → 7 nodes). Values 8 and 10 catch a merge that stops at 7.", "check_removal_test": null}
+{"task_id": "C1-03", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "The overlap merges to [−4,3] while [5,7] survives (23 → 15 nodes). Value 4 catches a filled gap, and 5–7 catch a dropped branch.", "check_removal_test": null}
+{"task_id": "C1-04", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "APPROVED", "review_notes": "The guarded intervals merge to [10,20] and the ≥40 branch stays independent (23 → 15 nodes). Disabled rows at 14 and 40 catch dropping the guard or applying it to the tail.", "check_removal_test": null}
 {"task_id": "B4-01", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
 {"task_id": "B4-02", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}
 {"task_id": "B4-03", "author_role": "evaluation", "reviewer_role": "llm", "review_status": "PENDING", "review_notes": null, "check_removal_test": null}

@@ -1,9 +1,9 @@
 # B3 and C1 development review packet
 
-This packet contains eight development tasks for independent review by Alvin
-(the LLM lead). All eight records in `benchmark_reviews.jsonl` are **PENDING**:
-`author_role="evaluation"`, `reviewer_role="llm"`, null `review_notes`, and null
-`check_removal_test`. Author checks do not constitute Alvin's approval.
+Alvin (the LLM lead) reviewed and approved all eight development tasks with
+Codex assistance at `e25c0e2f2856f1157feeec1a51d5f9b2c0da85ae`. Their files
+matched byte for byte at Alvin's handoff (`88b87d0`) and on Martin (`d30bda2`).
+His reasoning for each approval is in [the review records](benchmark_reviews.jsonl).
 
 The six new records extend the existing B3-01 and C1-01 seeds. The original seed
 JSON files and SQL seed file are unchanged. All task records use `split="dev"`.
@@ -88,9 +88,5 @@ were cross-checked with lexical counts under the stated signed-literal rule.
 
 ## Remaining acceptance gates
 
-Finite sample agreement and author reasoning do not prove the production
-translator correct or certify the full 100-task benchmark. Alvin must supply
-independent explanations and record his actual review. After Experiment A passes,
-the production verifier must confirm equivalence and strict node reduction for
-all eight references. No model calls or teammate implementations are included
-in this packet.
+After Experiment A passes, the production verifier must confirm equivalence and
+strict node reduction for all eight references.

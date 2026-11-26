@@ -167,7 +167,8 @@ Observed author acceptance results:
 
 ## Remaining handoffs
 
-Alvin must independently review all 32 tasks and record actual feedback/approval.
+Alvin approved the eight B3 and C1 development tasks. The 24 test tasks in
+this packet still need his independent review.
 David must deliver the production verifier/encoder and its validation evidence.
 After Experiment A passes, all 32 references still need formal equivalence and
 strict-size confirmation using that production implementation. This packet does

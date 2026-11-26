@@ -150,7 +150,7 @@
   },
   "dependency_versions": {
     "duckdb": "2.0.1",
-    "python": "3.13.7",
+    "python": "3.12.14",
     "sqlglot": "30.35.0",
     "z3-solver": "5.4.1.0"
   },
@@ -166,7 +166,7 @@
   "input_sha256": {
     "experiment_a_report": "00644df3ebfc21242efcd15be16abe02e901ddc91de97d3960a0e354d495d7ba",
     "manifest": "d0855520fb49d9270fa92d2b388afdd1b43a3a038d0786604d740b4de4fcb89d",
-    "reviews": "6e2cca7741b87093af1bf9c607bf1f78f03760c09db189a0bb93a083e22c9678",
+    "reviews": "20c379e257114f072f6e194608afd8f8eb040e96dba86bb4847a04629fb05506",
     "seed_file": "a53c128f15f1e915d7498ada096dca76dd2377f00b8657c9b33fe7b8b0a2f1f6"
   },
   "issues": [
@@ -250,10 +250,6 @@
       "message": "Every formal benchmark task needs an independent APPROVED review with notes",
       "severity": "blocker",
       "task_ids": [
-        "B3-01",
-        "B3-02",
-        "B3-03",
-        "B3-04",
         "B4-01",
         "B4-02",
         "B4-03",
@@ -262,10 +258,6 @@
         "B5-02",
         "B5-03",
         "B5-04",
-        "C1-01",
-        "C1-02",
-        "C1-03",
-        "C1-04",
         "C2-01",
         "C2-02",
         "C2-03",
@@ -309,10 +301,6 @@
   },
   "reviews": {
     "pending_ids": [
-      "B3-01",
-      "B3-02",
-      "B3-03",
-      "B3-04",
       "B4-01",
       "B4-02",
       "B4-03",
@@ -321,10 +309,6 @@
       "B5-02",
       "B5-03",
       "B5-04",
-      "C1-01",
-      "C1-02",
-      "C1-03",
-      "C1-04",
       "C2-01",
       "C2-02",
       "C2-03",
@@ -344,7 +328,8 @@
     ],
     "received": 32,
     "status_counts": {
-      "PENDING": 32
+      "APPROVED": 8,
+      "PENDING": 24
     },
     "unmatched_ids": []
   },
