@@ -1,4 +1,4 @@
-"""Dispatch sample checks and independent Experiment A checks."""
+"""Dispatch benchmark intake, sample checks, Experiment A and offline scoring."""
 
 import argparse
 import sys
@@ -15,7 +15,10 @@ def main(argv=None):
     if args and args[0] == "score":
         from .scorer import main as score_main
         return score_main(args[1:])
+    if args and args[0] == "validate-benchmark":
+        from .benchmark_check import main as benchmark_main
+        return benchmark_main(args[1:])
     parser = argparse.ArgumentParser(description="SQL benchmark and Experiment A evaluation utilities")
-    parser.add_argument("command", choices=("check-samples", "check-verifier", "score"))
+    parser.add_argument("command", choices=("check-samples", "check-verifier", "score", "validate-benchmark"))
     parser.parse_args(args)
     return 0

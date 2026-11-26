@@ -10,6 +10,7 @@ import platform
 
 from .duckdb_oracle import bounded_schema, enumerate_case, observe_row, validate_pair
 from .production import ProductionUnavailable, load_production
+from .provenance import production_provenance
 from .row_evaluator import evaluate_encoded_row
 from .sample_check import ROOT
 from .verifier_probes import CALIBRATION_CASES, independent_type_bound_probes, run_type_bound_probes
@@ -429,13 +430,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.timeout_ms <= 0:
         parser.error("--timeout-ms must be a positive integer")
-    report = {"mode": "fixtures_only" if args.fixtures_only else "production", "dependency_versions": dependency_versions(), "timeout_ms": args.timeout_ms}
+    report = {"mode": "fixtures_only" if args.fixtures_only else "production", "dependency_versions": dependency_versions(), "timeout_ms": args.timeout_ms,
+              "verifier_provenance": None, "test_standin": None}
     exit_code = 0
     try:
         cases = load_fixtures(args.fixtures)
         report["fixture_sha256"] = hashlib.sha256(args.fixtures.read_bytes()).hexdigest()
         report["fixtures_file"] = args.fixtures.resolve().relative_to(ROOT).as_posix() if args.fixtures.resolve().is_relative_to(ROOT) else args.fixtures.name
         api = None if args.fixtures_only else load_production()
+        if api is not None:
+            report["verifier_provenance"] = production_provenance(api)
+            report["test_standin"] = not report["verifier_provenance"]["verified"]
         offline = run_offline(cases)
         report["offline"] = compact_offline(offline)
         print("OFFLINE SUMMARY " + json.dumps(offline["summary"], sort_keys=True))

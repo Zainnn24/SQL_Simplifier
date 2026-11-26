@@ -28,6 +28,24 @@ class ReproductionHashTests(unittest.TestCase):
                 report = json.loads((ROOT / "evaluation/results" / filename).read_text(encoding="utf-8"))
                 self.assertEqual(report["fixture_sha256"], hashlib.sha256(data).hexdigest())
 
+    def test_benchmark_receipt_reports_match_all_saved_input_bytes(self):
+        sources = {
+            "manifest": ROOT / "evaluation/manifests/martin_draft.jsonl",
+            "reviews": ROOT / "evaluation/benchmark_reviews.jsonl",
+            "seed_file": ROOT / "data/SQL_Predicate_Family_Examples.sql",
+            "experiment_a_report": ROOT / "evaluation/results/experiment_a_production.json",
+        }
+        for filename in ("benchmark_draft.json", "benchmark_formal.json"):
+            report = json.loads((ROOT / "evaluation/results" / filename).read_text(encoding="utf-8"))
+            for key, path in sources.items():
+                with self.subTest(report=filename, source=key):
+                    if key == "experiment_a_report" and filename == "benchmark_draft.json":
+                        self.assertIsNone(report["input_sha256"][key])
+                        continue
+                    data = path.read_bytes()
+                    self.assertNotIn(b"\r", data)
+                    self.assertEqual(report["input_sha256"][key], hashlib.sha256(data).hexdigest())
+
 
 if __name__ == "__main__":
     unittest.main()

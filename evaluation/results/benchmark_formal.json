@@ -1,0 +1,2023 @@
+{
+  "check_removal_checks": [],
+  "coverage": {
+    "by_owner": {
+      "evaluation": 32
+    },
+    "expected": 100,
+    "families": {
+      "A1": [],
+      "A2": [],
+      "A3": [],
+      "A4": [],
+      "A5": [],
+      "B1": [],
+      "B2": [],
+      "B3": [
+        "B3-01",
+        "B3-02",
+        "B3-03",
+        "B3-04"
+      ],
+      "B4": [
+        "B4-01",
+        "B4-02",
+        "B4-03",
+        "B4-04"
+      ],
+      "B5": [
+        "B5-01",
+        "B5-02",
+        "B5-03",
+        "B5-04"
+      ],
+      "C1": [
+        "C1-01",
+        "C1-02",
+        "C1-03",
+        "C1-04"
+      ],
+      "C2": [
+        "C2-01",
+        "C2-02",
+        "C2-03",
+        "C2-04"
+      ],
+      "C3": [
+        "C3-01",
+        "C3-02",
+        "C3-03",
+        "C3-04"
+      ],
+      "C4": [
+        "C4-01",
+        "C4-02",
+        "C4-03",
+        "C4-04"
+      ],
+      "C5": [
+        "C5-01",
+        "C5-02",
+        "C5-03",
+        "C5-04"
+      ],
+      "D1": [],
+      "D2": [],
+      "D3": [],
+      "D4": [],
+      "D5": [],
+      "E1": [],
+      "E2": [],
+      "E3": [],
+      "E4": [],
+      "E5": []
+    },
+    "missing_ids": [
+      "A1-01",
+      "A1-02",
+      "A1-03",
+      "A1-04",
+      "A2-01",
+      "A2-02",
+      "A2-03",
+      "A2-04",
+      "A3-01",
+      "A3-02",
+      "A3-03",
+      "A3-04",
+      "A4-01",
+      "A4-02",
+      "A4-03",
+      "A4-04",
+      "A5-01",
+      "A5-02",
+      "A5-03",
+      "A5-04",
+      "B1-01",
+      "B1-02",
+      "B1-03",
+      "B1-04",
+      "B2-01",
+      "B2-02",
+      "B2-03",
+      "B2-04",
+      "D1-01",
+      "D1-02",
+      "D1-03",
+      "D1-04",
+      "D2-01",
+      "D2-02",
+      "D2-03",
+      "D2-04",
+      "D3-01",
+      "D3-02",
+      "D3-03",
+      "D3-04",
+      "D4-01",
+      "D4-02",
+      "D4-03",
+      "D4-04",
+      "D5-01",
+      "D5-02",
+      "D5-03",
+      "D5-04",
+      "E1-01",
+      "E1-02",
+      "E1-03",
+      "E1-04",
+      "E2-01",
+      "E2-02",
+      "E2-03",
+      "E2-04",
+      "E3-01",
+      "E3-02",
+      "E3-03",
+      "E3-04",
+      "E4-01",
+      "E4-02",
+      "E4-03",
+      "E4-04",
+      "E5-01",
+      "E5-02",
+      "E5-03",
+      "E5-04"
+    ],
+    "received": 32,
+    "split_counts": {
+      "dev": 8,
+      "test": 24
+    }
+  },
+  "dependency_versions": {
+    "duckdb": "2.0.1",
+    "python": "3.13.7",
+    "sqlglot": "30.35.0",
+    "z3-solver": "5.4.1.0"
+  },
+  "duplicate_screen": {
+    "method": "Existing author_checks.structural_signature for unconstrained predicates; shared column/literal context for predicates with schema CHECKs",
+    "scope": "Normalization heuristic over names, commuted operands, literal relationships and BIGINT endpoint roles; flagged task IDs require independent review of schema and boundary intent"
+  },
+  "duplicate_signatures": [],
+  "exit_code": 2,
+  "experiment_a_evidence": {
+    "accepted": false
+  },
+  "input_sha256": {
+    "experiment_a_report": "00644df3ebfc21242efcd15be16abe02e901ddc91de97d3960a0e354d495d7ba",
+    "manifest": "d0855520fb49d9270fa92d2b388afdd1b43a3a038d0786604d740b4de4fcb89d",
+    "reviews": "6e2cca7741b87093af1bf9c607bf1f78f03760c09db189a0bb93a083e22c9678",
+    "seed_file": "a53c128f15f1e915d7498ada096dca76dd2377f00b8657c9b33fe7b8b0a2f1f6"
+  },
+  "issues": [
+    {
+      "code": "INCOMPLETE_BENCHMARK",
+      "message": "Formal acceptance needs exactly 25 families with four canonical tasks each and the complete 20/80 split",
+      "missing_ids": [
+        "A1-01",
+        "A1-02",
+        "A1-03",
+        "A1-04",
+        "A2-01",
+        "A2-02",
+        "A2-03",
+        "A2-04",
+        "A3-01",
+        "A3-02",
+        "A3-03",
+        "A3-04",
+        "A4-01",
+        "A4-02",
+        "A4-03",
+        "A4-04",
+        "A5-01",
+        "A5-02",
+        "A5-03",
+        "A5-04",
+        "B1-01",
+        "B1-02",
+        "B1-03",
+        "B1-04",
+        "B2-01",
+        "B2-02",
+        "B2-03",
+        "B2-04",
+        "D1-01",
+        "D1-02",
+        "D1-03",
+        "D1-04",
+        "D2-01",
+        "D2-02",
+        "D2-03",
+        "D2-04",
+        "D3-01",
+        "D3-02",
+        "D3-03",
+        "D3-04",
+        "D4-01",
+        "D4-02",
+        "D4-03",
+        "D4-04",
+        "D5-01",
+        "D5-02",
+        "D5-03",
+        "D5-04",
+        "E1-01",
+        "E1-02",
+        "E1-03",
+        "E1-04",
+        "E2-01",
+        "E2-02",
+        "E2-03",
+        "E2-04",
+        "E3-01",
+        "E3-02",
+        "E3-03",
+        "E3-04",
+        "E4-01",
+        "E4-02",
+        "E4-03",
+        "E4-04",
+        "E5-01",
+        "E5-02",
+        "E5-03",
+        "E5-04"
+      ],
+      "severity": "blocker"
+    },
+    {
+      "code": "PENDING_REVIEWS",
+      "message": "Every formal benchmark task needs an independent APPROVED review with notes",
+      "severity": "blocker",
+      "task_ids": [
+        "B3-01",
+        "B3-02",
+        "B3-03",
+        "B3-04",
+        "B4-01",
+        "B4-02",
+        "B4-03",
+        "B4-04",
+        "B5-01",
+        "B5-02",
+        "B5-03",
+        "B5-04",
+        "C1-01",
+        "C1-02",
+        "C1-03",
+        "C1-04",
+        "C2-01",
+        "C2-02",
+        "C2-03",
+        "C2-04",
+        "C3-01",
+        "C3-02",
+        "C3-03",
+        "C3-04",
+        "C4-01",
+        "C4-02",
+        "C4-03",
+        "C4-04",
+        "C5-01",
+        "C5-02",
+        "C5-03",
+        "C5-04"
+      ]
+    },
+    {
+      "code": "PRODUCTION_UNAVAILABLE",
+      "message": "Production verifier is missing required interfaces: validate_input (must be callable), verify (must be callable), encode_query (must be callable), InputError (must be a ValueError subclass)",
+      "severity": "blocker"
+    },
+    {
+      "code": "EXPERIMENT_A_EVIDENCE",
+      "message": "Current successful Experiment A evidence is required independently of API availability: Experiment A must be an actual successful production run, not an offline/test report",
+      "severity": "blocker"
+    }
+  ],
+  "mode": "formal",
+  "production": {
+    "checks": [],
+    "missing_interfaces": [
+      "validate_input",
+      "verify",
+      "encode_query",
+      "InputError"
+    ],
+    "run_status": "NOT_RUN",
+    "test_standin": false
+  },
+  "reviews": {
+    "pending_ids": [
+      "B3-01",
+      "B3-02",
+      "B3-03",
+      "B3-04",
+      "B4-01",
+      "B4-02",
+      "B4-03",
+      "B4-04",
+      "B5-01",
+      "B5-02",
+      "B5-03",
+      "B5-04",
+      "C1-01",
+      "C1-02",
+      "C1-03",
+      "C1-04",
+      "C2-01",
+      "C2-02",
+      "C2-03",
+      "C2-04",
+      "C3-01",
+      "C3-02",
+      "C3-03",
+      "C3-04",
+      "C4-01",
+      "C4-02",
+      "C4-03",
+      "C4-04",
+      "C5-01",
+      "C5-02",
+      "C5-03",
+      "C5-04"
+    ],
+    "received": 32,
+    "status_counts": {
+      "PENDING": 32
+    },
+    "unmatched_ids": []
+  },
+  "sample_checks": [
+    {
+      "actual_rows": [
+        [
+          1,
+          14
+        ],
+        [
+          2,
+          15
+        ],
+        [
+          3,
+          16
+        ],
+        [
+          4,
+          15
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "B3-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B3-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B3-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B3-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B3-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B3-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B3-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B3-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B3-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          -1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "B4-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B4-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B4-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B4-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B4-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B4-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B4-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B4-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B4-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          -9223372036854775808
+        ],
+        [
+          2,
+          -1
+        ],
+        [
+          3,
+          0
+        ],
+        [
+          4,
+          9223372036854775806
+        ],
+        [
+          5,
+          9223372036854775807
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "B5-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B5-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B5-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B5-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B5-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B5-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B5-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "B5-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "B5-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          9
+        ],
+        [
+          2,
+          10
+        ],
+        [
+          3,
+          17
+        ],
+        [
+          4,
+          18
+        ],
+        [
+          5,
+          20
+        ],
+        [
+          6,
+          21
+        ],
+        [
+          7,
+          25
+        ],
+        [
+          8,
+          26
+        ],
+        [
+          9,
+          39
+        ],
+        [
+          10,
+          40
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "C1-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C1-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C1-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C1-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C1-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C1-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C1-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C1-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C1-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          6
+        ],
+        [
+          5,
+          7
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "C2-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C2-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C2-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C2-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C2-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          7
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C2-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ],
+        [
+          7
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C2-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C2-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          5
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C2-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          -1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          3,
+          1
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "C3-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C3-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C3-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C3-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C3-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C3-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          3
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C3-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C3-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C3-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          8
+        ],
+        [
+          5,
+          9
+        ],
+        [
+          6,
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "C4-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C4-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          5
+        ],
+        [
+          6
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C4-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C4-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          4
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C4-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C4-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          4
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C4-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C4-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C4-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          6,
+          8
+        ],
+        [
+          7,
+          9
+        ],
+        [
+          8,
+          11
+        ],
+        [
+          9,
+          13
+        ],
+        [
+          10,
+          14
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "seed_rows",
+      "task_id": "C5-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C5-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C5-01",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C5-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C5-02",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C5-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          2
+        ],
+        [
+          3
+        ],
+        [
+          5
+        ],
+        [
+          6
+        ],
+        [
+          10
+        ],
+        [
+          11
+        ],
+        [
+          13
+        ],
+        [
+          14
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C5-03",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          5
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "original_sql",
+      "task_id": "C5-04",
+      "unexpected": []
+    },
+    {
+      "actual_rows": [
+        [
+          1
+        ],
+        [
+          2
+        ],
+        [
+          5
+        ],
+        [
+          7
+        ],
+        [
+          8
+        ],
+        [
+          9
+        ],
+        [
+          10
+        ]
+      ],
+      "error": null,
+      "missing": [],
+      "passed": true,
+      "source": "reference_sql",
+      "task_id": "C5-04",
+      "unexpected": []
+    }
+  ],
+  "seed_checks": [
+    {
+      "passed": true,
+      "task_id": "B3-01"
+    },
+    {
+      "passed": true,
+      "task_id": "B4-01"
+    },
+    {
+      "passed": true,
+      "task_id": "B5-01"
+    },
+    {
+      "passed": true,
+      "task_id": "C1-01"
+    },
+    {
+      "passed": true,
+      "task_id": "C2-01"
+    },
+    {
+      "passed": true,
+      "task_id": "C3-01"
+    },
+    {
+      "passed": true,
+      "task_id": "C4-01"
+    },
+    {
+      "passed": true,
+      "task_id": "C5-01"
+    }
+  ],
+  "status": "FORMAL_BLOCKED",
+  "timeout_ms": 5000
+}
