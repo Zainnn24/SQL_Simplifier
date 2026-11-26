@@ -12,15 +12,28 @@
   "production": {
     "diagnostic": "Production verifier is missing required interfaces: validate_input (must be callable), verify (must be callable), encode_query (must be callable), InputError (must be a ValueError subclass)",
     "metrics": {
+      "calibration_cases": null,
+      "calibration_checks": null,
+      "calibration_confirmed_replay_rate": null,
+      "calibration_confirmed_replays": null,
+      "calibration_errors": null,
+      "calibration_node_mismatches": null,
+      "calibration_sat_disagreement_models": null,
+      "calibration_validation_checks": null,
       "confirmed_replay_rate": null,
       "confirmed_replays": null,
       "false_different": null,
       "false_equivalent": null,
       "inconclusive_checks": null,
+      "node_count_mismatches": null,
       "row_errors": null,
       "row_inconclusive": null,
       "row_mismatches": null,
-      "sat_disagreement_models": null
+      "sat_disagreement_models": null,
+      "type_bound_errors": null,
+      "type_bound_inconclusive": null,
+      "type_bound_mismatches": null,
+      "type_bound_probes": null
     },
     "missing_interfaces": [
       "validate_input",

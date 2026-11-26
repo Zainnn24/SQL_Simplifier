@@ -12,6 +12,7 @@ from .duckdb_oracle import bounded_schema, enumerate_case, observe_row, validate
 from .production import ProductionUnavailable, load_production
 from .row_evaluator import evaluate_encoded_row
 from .sample_check import ROOT
+from .verifier_probes import CALIBRATION_CASES, independent_type_bound_probes, run_type_bound_probes
 
 
 FIXTURE_FIELDS = {
@@ -140,6 +141,7 @@ def offline_case(case):
 
 def run_offline(cases):
     results = [offline_case(case) for case in cases]
+    probes = independent_type_bound_probes()
     bounded = [result["bounded"] for result in results if result["bounded"] is not None]
     replays = [result["counterexample_replay"] for result in results if result["counterexample_replay"] is not None]
     summary = {
@@ -150,8 +152,9 @@ def run_offline(cases):
         "legal_rows": sum(item["legal_rows"] for item in bounded),
         "distinguishing_rows": sum(item["distinguishing_rows"] for item in bounded),
         "failed_cases": sum(bool(result["errors"]) for result in results),
+        "type_bound_probes": probes["probe_count"], "type_bound_probe_errors": len(probes["errors"]),
     }
-    return {"summary": summary, "cases": results}
+    return {"summary": summary, "cases": results, "type_bound_probes": probes}
 
 
 def production_not_run(reason, missing=()):
@@ -160,6 +163,10 @@ def production_not_run(reason, missing=()):
         "metrics": {key: None for key in (
             "false_equivalent", "false_different", "inconclusive_checks", "row_mismatches",
             "row_inconclusive", "row_errors", "sat_disagreement_models", "confirmed_replays", "confirmed_replay_rate",
+            "type_bound_probes", "type_bound_mismatches", "type_bound_errors", "type_bound_inconclusive",
+            "node_count_mismatches", "calibration_cases", "calibration_checks", "calibration_validation_checks",
+            "calibration_node_mismatches", "calibration_errors", "calibration_sat_disagreement_models",
+            "calibration_confirmed_replays", "calibration_confirmed_replay_rate",
         )},
     }
 
@@ -205,12 +212,75 @@ def validation_result_errors(result):
     return errors
 
 
+def run_calibration(api, timeout_ms):
+    """Calibrate known counts through real verifier APIs, not another translator."""
+    metrics = {name: 0 for name in (
+        "calibration_cases", "calibration_checks", "calibration_validation_checks",
+        "calibration_node_mismatches", "calibration_errors",
+        "calibration_sat_disagreement_models", "calibration_confirmed_replays",
+    )}
+    records, discrepancies = [], []
+
+    def failure(case, stage, expected, actual, **inputs):
+        metrics["calibration_node_mismatches" if stage == "calibration_node_count" else "calibration_errors"] += 1
+        discrepancies.append({"case_id": case["case_id"], "stage": stage, "expected": expected, "actual": actual, "inputs": inputs})
+
+    for case in CALIBRATION_CASES:
+        metrics["calibration_cases"] += 1
+        request = {key: case[key] for key in ("schema_sql", "original_sql", "candidate_sql")}
+        request["timeout_ms"] = timeout_ms
+        record = {"case_id": case["case_id"], "request": request, "expected_status": case["expected_status"],
+                  "expected_nodes": {key: case[key] for key in ("original_nodes", "candidate_nodes")},
+                  "validation": None, "result": None, "replay": None}
+        metrics["calibration_validation_checks"] += 1
+        try:
+            validation = api.validate_input(case["schema_sql"], case["original_sql"], timeout_ms=timeout_ms)
+            record["validation"] = validation
+            errors = validation_result_errors(validation)
+            if errors or validation.get("status") != "READY":
+                failure(case, "calibration_validation", {"status": "READY", "original_nodes": case["original_nodes"]},
+                        {"result": validation, "errors": errors}, **request)
+            elif validation["original_nodes"] != case["original_nodes"]:
+                failure(case, "calibration_node_count", case["original_nodes"], validation["original_nodes"], field="validation.original_nodes", **request)
+        except Exception as error:
+            failure(case, "calibration_validation", "READY", {"exception": str(error)}, **request)
+        metrics["calibration_checks"] += 1
+        try:
+            result = api.verify(**request)
+            record["result"] = result
+            require(isinstance(result, dict), "Malformed calibration CheckResult")
+            errors = check_result_errors(result)
+            if errors:
+                failure(case, "calibration_result_contract", "Complete shared CheckResult", {"result": result, "errors": errors}, **request)
+            if result.get("status") != case["expected_status"]:
+                failure(case, "calibration_verdict", case["expected_status"], result, **request)
+            if result.get("status") in ("EQUIVALENT", "DIFFERENT"):
+                for field in ("original_nodes", "candidate_nodes"):
+                    if type(result.get(field)) is int and result[field] != case[field]:
+                        failure(case, "calibration_node_count", case[field], result[field], field=f"verify.{field}", **request)
+            if result.get("status") in ("DIFFERENT", "REPLAY_ERROR"):
+                metrics["calibration_sat_disagreement_models"] += 1
+                if result["status"] == "DIFFERENT":
+                    record["replay"] = replay_witness(case, result.get("witness"))
+                    if record["replay"]["confirmed"]:
+                        metrics["calibration_confirmed_replays"] += 1
+                    else:
+                        failure(case, "calibration_witness", "Legal distinguishing row confirmed in DuckDB", record["replay"], **request)
+        except Exception as error:
+            failure(case, "calibration_verify", case["expected_status"], {"exception": str(error)}, **request)
+        records.append(record)
+    denominator = metrics["calibration_sat_disagreement_models"]
+    metrics["calibration_confirmed_replay_rate"] = metrics["calibration_confirmed_replays"] / denominator if denominator else None
+    return {"run_status": "COMPLETED", "metrics": metrics, "cases": records, "discrepancies": discrepancies}
+
+
 def run_production(cases, offline, api, timeout_ms):
     """Consume real APIs in normal runs; tests may supply explicitly scripted APIs."""
     metrics = {key: 0 for key in (
         "full_checks", "bounded_checks", "false_equivalent", "false_different", "verdict_mismatches",
         "validation_mismatches", "validation_inconclusive", "inconclusive_checks", "row_checks", "row_mismatches", "row_inconclusive",
         "row_errors", "sat_disagreement_models", "confirmed_replays", "replay_errors", "infrastructure_errors",
+        "node_count_mismatches",
     )}
     metrics["verdict_counts_by_stage"] = {stage: {} for stage in ("full_range", "bounded")}
     metrics["wrong_directions_by_stage"] = {stage: {"false_equivalent": 0, "false_different": 0} for stage in ("full_range", "bounded")}
@@ -220,7 +290,7 @@ def run_production(cases, offline, api, timeout_ms):
     def discrepancy(case, stage, expected, actual, **inputs):
         discrepancies.append({"case_id": case["case_id"], "stage": stage, "expected": expected, "actual": actual, "inputs": inputs})
 
-    def check_pair(case, schema, expected, stage):
+    def check_pair(case, schema, expected, stage, expected_original_nodes=None):
         request = {"schema_sql": schema, "original_sql": case["original_sql"], "candidate_sql": case["candidate_sql"], "timeout_ms": timeout_ms}
         metrics["full_checks" if stage == "full_range" else "bounded_checks"] += 1
         try:
@@ -237,6 +307,10 @@ def run_production(cases, offline, api, timeout_ms):
         if contract_errors:
             metrics["infrastructure_errors"] += 1
             discrepancy(case, f"{stage}_result_contract", "Complete shared CheckResult", {"errors": contract_errors, "result": result}, **request)
+        if status in ("EQUIVALENT", "DIFFERENT") and expected_original_nodes is not None and type(result.get("original_nodes")) is int and result["original_nodes"] != expected_original_nodes:
+            metrics["node_count_mismatches"] += 1
+            discrepancy(case, f"{stage}_node_count", {"original_nodes": expected_original_nodes},
+                        {"original_nodes": result["original_nodes"]}, validation_original_nodes=expected_original_nodes, **request)
         if status == "INCONCLUSIVE":
             metrics["inconclusive_checks"] += 1
             discrepancy(case, stage, expected, result, **request)
@@ -279,12 +353,14 @@ def run_production(cases, offline, api, timeout_ms):
         except Exception as error:
             metrics["infrastructure_errors"] += 1
             discrepancy(case, "validate_input", source_expected, str(error), schema_sql=case["schema_sql"], original_sql=case["original_sql"])
-        record["full_range"] = check_pair(case, case["schema_sql"], case["expected_status"], "full_range")
+        validation = record["validation"]
+        original_nodes = validation.get("original_nodes") if isinstance(validation, dict) and validation.get("status") == "READY" and type(validation.get("original_nodes")) is int and validation["original_nodes"] > 0 else None
+        record["full_range"] = check_pair(case, case["schema_sql"], case["expected_status"], "full_range", original_nodes)
         bounded = by_id[case["case_id"]]["bounded"]
         if bounded is not None:
             try:
                 schema = bounded_schema(case["schema_sql"], case["enumeration"])
-                record["bounded"] = {"schema_sql": schema, "expected_status": bounded["status"], "result": check_pair(case, schema, bounded["status"], "bounded")}
+                record["bounded"] = {"schema_sql": schema, "expected_status": bounded["status"], "result": check_pair(case, schema, bounded["status"], "bounded", original_nodes)}
             except Exception as error:
                 metrics["infrastructure_errors"] += 1
                 discrepancy(case, "bounded_schema", "Exact-domain schema", str(error), schema_sql=case["schema_sql"], enumeration=case["enumeration"])
@@ -313,6 +389,22 @@ def run_production(cases, offline, api, timeout_ms):
     denominator = metrics["sat_disagreement_models"]
     metrics["confirmed_replay_rate"] = metrics["confirmed_replays"] / denominator if denominator else None
     return {"run_status": "COMPLETED", "metrics": metrics, "cases": outcomes, "discrepancies": discrepancies}
+
+
+def run_production_suite(cases, offline, api, timeout_ms):
+    """Run fixtures, separate Python row probes, and API count calibration."""
+    report = run_production(cases, offline, api, timeout_ms)
+    expectations = offline.get("type_bound_probes")
+    if expectations is None:
+        expectations = independent_type_bound_probes()
+    probes = run_type_bound_probes(expectations, evaluate_encoded_row, timeout_ms)
+    calibration = run_calibration(api, timeout_ms)
+    report["type_bound_probes"] = probes
+    report["calibration"] = calibration
+    for extra in (probes, calibration):
+        report["metrics"].update(extra["metrics"])
+        report["discrepancies"].extend(extra["discrepancies"])
+    return report
 
 
 def dependency_versions():
@@ -352,13 +444,13 @@ def main(argv=None):
             print(f"{'FAIL' if item['errors'] else 'PASS'} {item['case_id']}: full_range_author_label={item['expected_status']}; bounded={None if bounded is None else bounded['status']}; rows={0 if bounded is None else bounded['total_rows']}; legal={0 if bounded is None else bounded['legal_rows']}")
         if args.fixtures_only:
             report["production"] = production_not_run("Fixtures-only mode: no production API was called")
-        elif offline["summary"]["failed_cases"]:
+        elif offline["summary"]["failed_cases"] or offline["summary"]["type_bound_probe_errors"]:
             report["production"] = production_not_run("Independent fixture checks must pass before production comparisons")
         else:
-            report["production"] = run_production(cases, offline, api, args.timeout_ms)
+            report["production"] = run_production_suite(cases, offline, api, args.timeout_ms)
             print("PRODUCTION METRICS " + json.dumps(report["production"]["metrics"], sort_keys=True))
             exit_code = int(bool(report["production"]["discrepancies"]))
-        exit_code = max(exit_code, int(bool(offline["summary"]["failed_cases"])))
+        exit_code = max(exit_code, int(bool(offline["summary"]["failed_cases"] or offline["summary"]["type_bound_probe_errors"])))
     except ProductionUnavailable as error:
         report["production"] = production_not_run(str(error), getattr(error, "missing", ()))
         print(f"BLOCKED: {error}")
